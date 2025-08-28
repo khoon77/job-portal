@@ -2,33 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "main.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
-    },
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
       "src": "/api/(.*)",
-      "dest": "/main.py"
+      "dest": "/api/index.py"
     },
     {
       "src": "/(.*)",
-      "dest": "/main.py"
+      "dest": "/api/index.py"
     }
   ],
-  "env": {
-    "PYTHONPATH": "/var/task"
-  },
   "functions": {
-    "main.py": {
+    "api/index.py": {
       "maxDuration": 30
     }
   }

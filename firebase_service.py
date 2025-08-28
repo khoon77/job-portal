@@ -6,6 +6,7 @@ Firebase Firestore 데이터베이스 서비스
 """
 
 import json
+import os
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from firebase_admin import credentials, firestore, initialize_app
@@ -25,7 +26,19 @@ class FirebaseJobService:
         try:
             # Firebase Admin SDK 초기화 (중복 초기화 방지)
             if not firebase_admin._apps:
-                cred = credentials.Certificate(credentials_path)
+                # Vercel 환경에서는 환경 변수로 credentials 제공
+                if os.getenv('FIREBASE_CREDENTIALS_JSON'):
+                    # 환경 변수에서 JSON 직접 로드
+                    import json
+                    credentials_dict = json.loads(os.getenv('FIREBASE_CREDENTIALS_JSON'))
+                    cred = credentials.Certificate(credentials_dict)
+                elif os.path.exists(credentials_path):
+                    # 로컬 환경에서는 파일에서 로드
+                    cred = credentials.Certificate(credentials_path)
+                else:
+                    print(f"[Firebase] credentials 파일을 찾을 수 없습니다: {credentials_path}")
+                    return
+                
                 initialize_app(cred, {
                     'projectId': FIREBASE_PROJECT_ID,
                 })
@@ -35,7 +48,7 @@ class FirebaseJobService:
             
         except Exception as e:
             print(f"[Firebase] 초기화 실패: {e}")
-            print(f"[Firebase] credentials 파일 경로를 확인하세요: {credentials_path}")
+            print(f"[Firebase] credentials 설정을 확인하세요")
     
     def save_jobs(self, jobs: List[Dict]) -> bool:
         """채용공고 목록을 Firestore에 저장"""
