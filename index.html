@@ -281,10 +281,10 @@
         }
 
         .job-dday-badge.urgent {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+            background: transparent;
+            color: #dc2626;
+            border: 2px solid #dc2626;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
             animation: urgentPulse 2s ease-in-out infinite;
         }
         
@@ -1899,7 +1899,7 @@
                 // jobs 컬렉션에서 데이터 가져오기
                 const jobsSnapshot = await db.collection('jobs')
                     .orderBy('reg_date', 'desc')
-                    .limit(20)
+                    .limit(100)
                     .get();
                 
                 const jobs = [];
