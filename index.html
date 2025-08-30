@@ -307,6 +307,19 @@
             box-shadow: 0 4px 15px rgba(107, 114, 128, 0.2);
         }
 
+        .job-dday-badge.permanent {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            animation: permanentGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes permanentGlow {
+            0%, 100% { box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5); }
+        }
+
         .job-badge {
             padding: 6px 14px;
             border-radius: 20px;
@@ -1573,6 +1586,9 @@
         function formatDate(dateString) {
             if (!dateString || dateString.length !== 8) return dateString || '-';
             
+            // 99991231인 경우 상시채용으로 표시
+            if (dateString === '99991231') return '상시채용';
+            
             const year = dateString.substring(0, 4);
             const month = dateString.substring(4, 6);
             const day = dateString.substring(6, 8);
@@ -1582,6 +1598,9 @@
         // D-Day 계산
         function calculateDDay(endDateString) {
             if (!endDateString || endDateString.length !== 8) return null;
+            
+            // 99991231인 경우 상시채용이므로 null 반환 (D-Day 표시 없음)
+            if (endDateString === '99991231') return null;
             
             const year = parseInt(endDateString.substring(0, 4));
             const month = parseInt(endDateString.substring(4, 6)) - 1;
@@ -1606,7 +1625,9 @@
         }
         
         // D-Day 클래스 결정
-        function getDDayClass(dDay) {
+        function getDDayClass(dDay, endDateString) {
+            // 상시채용인 경우
+            if (endDateString === '99991231') return 'permanent';
             if (dDay === null || dDay < 0) return 'expired';
             if (dDay <= 3) return 'urgent';
             return 'normal';
@@ -1648,8 +1669,8 @@
             
             const jobsHtml = currentPageJobs.map(job => {
                 const dDay = calculateDDay(job.end_date);
-                const dDayFormatted = formatDDay(dDay);
-                const dDayClass = getDDayClass(dDay);
+                const dDayFormatted = job.end_date === '99991231' ? '상시채용' : formatDDay(dDay);
+                const dDayClass = getDDayClass(dDay, job.end_date);
                 
                 // 기관명 축약 (긴 이름 처리)
                 const shortDeptName = job.dept_name && job.dept_name.length > 20 
