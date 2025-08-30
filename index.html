@@ -280,12 +280,19 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .job-dday-badge.urgent {
+        .job-dday-badge.today {
             background: transparent;
             color: #dc2626;
-            border: 2px solid #dc2626;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+            border: 2px solid #f59e0b;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
             animation: urgentPulse 2s ease-in-out infinite;
+        }
+
+        .job-dday-badge.urgent {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #dc2626;
+            border: none;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
         }
         
         @keyframes urgentPulse {
@@ -1633,7 +1640,8 @@
             // 상시채용인 경우
             if (endDateString === '99991231') return 'permanent';
             if (dDay === null || dDay < 0) return 'expired';
-            if (dDay <= 3) return 'urgent';
+            if (dDay === 0) return 'today'; // D-0 별도 스타일
+            if (dDay <= 3) return 'urgent'; // D-1~D-3
             return 'normal';
         }
         
