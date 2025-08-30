@@ -38,7 +38,9 @@ jobs:
       env:
         FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
       run: |
-        echo "$FIREBASE_CREDENTIALS" > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
+        echo "$FIREBASE_CREDENTIALS" | tr -d '\r' > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
+        echo "Firebase credentials file created"
+        python -c "import json; json.load(open('job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json')); print('JSON validation passed')"
     
     - name: Run auto sync
       env:
@@ -83,7 +85,9 @@ jobs:
       env:
         FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
       run: |
-        echo "$FIREBASE_CREDENTIALS" > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
+        echo "$FIREBASE_CREDENTIALS" | tr -d '\r' > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
+        echo "Firebase credentials file created"
+        python -c "import json; json.load(open('job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json')); print('JSON validation passed')"
     
     - name: Run data cleanup
       env:
