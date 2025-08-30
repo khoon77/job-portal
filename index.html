@@ -1056,19 +1056,8 @@
             color: #f0f9ff;
         }
 
-        .filter-label.disabled {
-            color: #9ca3af;
-            cursor: pointer;
-            opacity: 0.6;
-        }
-
-        .filter-label.disabled:hover {
-            color: #6b7280;
-        }
-
         .agency-checkbox:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            cursor: pointer;
         }
         
         /* 페이지네이션 */
@@ -1501,12 +1490,12 @@
                         <label for="filter-government" class="filter-label">정부 기관</label>
                     </div>
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-public" class="agency-checkbox" disabled>
-                        <label for="filter-public" class="filter-label disabled" onclick="showComingSoonMessage('공공 기관')">공공 기관</label>
+                        <input type="checkbox" id="filter-public" class="agency-checkbox" disabled onclick="showComingSoonMessage('공공 기관')">
+                        <label for="filter-public" class="filter-label" onclick="showComingSoonMessage('공공 기관')">공공 기관</label>
                     </div>
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-local" class="agency-checkbox" disabled>
-                        <label for="filter-local" class="filter-label disabled" onclick="showComingSoonMessage('지자체')">지자체</label>
+                        <input type="checkbox" id="filter-local" class="agency-checkbox" disabled onclick="showComingSoonMessage('지자체')">
+                        <label for="filter-local" class="filter-label" onclick="showComingSoonMessage('지자체')">지자체</label>
                     </div>
                 </div>
             </div>
@@ -2335,7 +2324,7 @@
                 message.style.opacity = '1';
             }, 10);
             
-            // 2초 후 페이드 아웃 후 제거
+            // 0.5초 후 페이드 아웃 후 제거
             setTimeout(() => {
                 message.style.opacity = '0';
                 setTimeout(() => {
@@ -2343,7 +2332,7 @@
                         document.body.removeChild(message);
                     }
                 }, 300);
-            }, 2000);
+            }, 500);
         }
 
         // 페이지 이동
