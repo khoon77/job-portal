@@ -38,9 +38,21 @@ jobs:
       env:
         FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
       run: |
-        echo "$FIREBASE_CREDENTIALS" | tr -d '\r' > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
-        echo "Firebase credentials file created"
-        python -c "import json; json.load(open('job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json')); print('JSON validation passed')"
+        # 모든 제어 문자 제거 및 JSON 정리
+        echo "$FIREBASE_CREDENTIALS" | tr -d '\r\n\t' | sed 's/[[:cntrl:]]//g' | python -c "
+import sys, json
+try:
+    content = sys.stdin.read().strip()
+    # JSON 파싱 테스트
+    data = json.loads(content)
+    # 올바른 형식으로 재출력
+    with open('job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print('Firebase credentials file created and validated')
+except Exception as e:
+    print(f'Error processing credentials: {e}')
+    exit(1)
+"
     
     - name: Run auto sync
       env:
@@ -85,9 +97,21 @@ jobs:
       env:
         FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
       run: |
-        echo "$FIREBASE_CREDENTIALS" | tr -d '\r' > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
-        echo "Firebase credentials file created"
-        python -c "import json; json.load(open('job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json')); print('JSON validation passed')"
+        # 모든 제어 문자 제거 및 JSON 정리
+        echo "$FIREBASE_CREDENTIALS" | tr -d '\r\n\t' | sed 's/[[:cntrl:]]//g' | python -c "
+import sys, json
+try:
+    content = sys.stdin.read().strip()
+    # JSON 파싱 테스트
+    data = json.loads(content)
+    # 올바른 형식으로 재출력
+    with open('job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    print('Firebase credentials file created and validated')
+except Exception as e:
+    print(f'Error processing credentials: {e}')
+    exit(1)
+"
     
     - name: Run data cleanup
       env:
