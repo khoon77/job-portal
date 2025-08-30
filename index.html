@@ -1535,7 +1535,7 @@
         <!-- 통계 섹션 -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number" id="totalJobs">-</div>
+                <div class="stat-number clickable" id="totalJobs" onclick="resetFilter()" title="전체 채용공고 보기">-</div>
                 <div class="stat-label">전체 채용</div>
                 <div class="stat-sublabel">(30일 기준)</div>
             </div>
@@ -2379,8 +2379,6 @@
             currentPage = 1;
             renderJobs(filteredJobs);
             
-            // 필터 상태 표시
-            showFilterMessage('임박한 채용공고', filteredJobs.length);
             
             // 페이지 상단으로 스크롤
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2406,66 +2404,16 @@
             currentPage = 1;
             renderJobs(filteredJobs);
             
-            // 필터 상태 표시
-            showFilterMessage('최근 7일 채용공고', filteredJobs.length);
             
             // 페이지 상단으로 스크롤
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 필터 메시지 표시
-        function showFilterMessage(type, count) {
-            // 기존 메시지가 있으면 제거
-            const existingMessage = document.querySelector('.filter-status-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-            
-            // 메시지 엘리먼트 생성
-            const message = document.createElement('div');
-            message.className = 'filter-status-message';
-            message.innerHTML = `
-                <span>${type} ${count}개 표시</span>
-                <button onclick="resetFilter()" style="
-                    background: rgba(255,255,255,0.2);
-                    border: 1px solid rgba(255,255,255,0.3);
-                    color: white;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    margin-left: 10px;
-                    cursor: pointer;
-                ">전체보기</button>
-            `;
-            message.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 12px 16px;
-                border-radius: 8px;
-                font-size: 14px;
-                z-index: 1000;
-                display: flex;
-                align-items: center;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            `;
-            
-            document.body.appendChild(message);
-        }
-
-        // 필터 리셋
+        // 필터 리셋 (전체 채용공고 표시)
         function resetFilter() {
             filteredJobs = [...allJobs];
             currentPage = 1;
             renderJobs(filteredJobs);
-            
-            // 메시지 제거
-            const message = document.querySelector('.filter-status-message');
-            if (message) {
-                message.remove();
-            }
         }
 
         // 파일 아이콘 결정
