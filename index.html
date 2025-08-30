@@ -1490,12 +1490,12 @@
                         <label for="filter-government" class="filter-label">정부 기관</label>
                     </div>
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-public" class="agency-checkbox" disabled onclick="showComingSoonMessage('공공 기관')">
-                        <label for="filter-public" class="filter-label" onclick="showComingSoonMessage('공공 기관')">공공 기관</label>
+                        <input type="checkbox" id="filter-public" class="agency-checkbox" disabled onclick="showComingSoonMessage()">
+                        <label for="filter-public" class="filter-label" onclick="showComingSoonMessage()">공공 기관</label>
                     </div>
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-local" class="agency-checkbox" disabled onclick="showComingSoonMessage('지자체')">
-                        <label for="filter-local" class="filter-label" onclick="showComingSoonMessage('지자체')">지자체</label>
+                        <input type="checkbox" id="filter-local" class="agency-checkbox" disabled onclick="showComingSoonMessage()">
+                        <label for="filter-local" class="filter-label" onclick="showComingSoonMessage()">지자체</label>
                     </div>
                 </div>
             </div>
@@ -2290,7 +2290,7 @@
         }
         
         // 연결 예정 메시지 표시
-        function showComingSoonMessage(type) {
+        function showComingSoonMessage() {
             // 기존 메시지가 있으면 제거
             const existingMessage = document.querySelector('.coming-soon-message');
             if (existingMessage) {
@@ -2300,7 +2300,7 @@
             // 메시지 엘리먼트 생성
             const message = document.createElement('div');
             message.className = 'coming-soon-message';
-            message.textContent = `${type} 연결 예정`;
+            message.textContent = '연결 예정';
             message.style.cssText = `
                 position: fixed;
                 top: 50%;
