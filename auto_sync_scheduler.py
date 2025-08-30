@@ -14,27 +14,8 @@ import time
 def initialize_firebase():
     """Firebase 초기화"""
     if not firebase_admin._apps:
-        # GitHub Actions에서는 환경변수로 인증키 전달
-        if os.getenv('GITHUB_ACTIONS'):
-            # GitHub Secrets에서 Firebase 인증 정보 가져오기
-            firebase_config = {
-                "type": "service_account",
-                "project_id": os.getenv('FIREBASE_PROJECT_ID'),
-                "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID'),
-                "private_key": os.getenv('FIREBASE_PRIVATE_KEY').replace('\\n', '\n'),
-                "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
-                "client_id": os.getenv('FIREBASE_CLIENT_ID'),
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_x509_cert_url": os.getenv('FIREBASE_CLIENT_CERT_URL')
-            }
-            
-            cred = credentials.Certificate(firebase_config)
-        else:
-            # 로컬 실행시에는 파일 사용
-            cred = credentials.Certificate("job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json")
-        
+        # GitHub Actions와 로컬 모두 JSON 파일 사용
+        cred = credentials.Certificate("job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json")
         firebase_admin.initialize_app(cred)
     
     return firestore.client()
