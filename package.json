@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "description": "Korean Government Job Portal",
   "scripts": {
-    "build": "echo 'Static site - no build required'"
+    "build": "mkdir -p public && cp index.html public/"
   }
 }
