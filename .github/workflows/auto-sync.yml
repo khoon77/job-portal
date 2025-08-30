@@ -36,9 +36,9 @@ jobs:
         
     - name: Create Firebase credentials
       env:
-        FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+        FIREBASE_CREDENTIALS_BASE64: ${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}
       run: |
-        python fix_firebase_credentials.py
+        echo "$FIREBASE_CREDENTIALS_BASE64" | base64 --decode > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
     
     - name: Run auto sync
       env:
@@ -81,9 +81,9 @@ jobs:
         
     - name: Create Firebase credentials
       env:
-        FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+        FIREBASE_CREDENTIALS_BASE64: ${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}
       run: |
-        python fix_firebase_credentials.py
+        echo "$FIREBASE_CREDENTIALS_BASE64" | base64 --decode > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
     
     - name: Run data cleanup
       env:
