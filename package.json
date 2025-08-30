@@ -2,11 +2,7 @@
   "name": "job-portal",
   "version": "1.0.0",
   "description": "Korean Government Job Portal",
-  "main": "index.html",
   "scripts": {
-    "start": "serve -s .",
-    "build": "echo 'No build required'"
-  },
-  "author": "",
-  "license": "MIT"
+    "build": "echo 'Static site - no build required'"
+  }
 }
