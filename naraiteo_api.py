@@ -34,6 +34,50 @@ class NaraiteoAPI:
         if not area_code:
             return ""
         
+        # 상세 지역코드 맵핑 (시군구 포함)
+        detailed_area_map = {
+            # 전라북도
+            "45000": "전라북도",
+            "45130": "전라북도 군산시",
+            "45140": "전라북도 익산시", 
+            "45180": "전라북도 정읍시",
+            "45190": "전라북도 남원시",
+            "45210": "전라북도 김제시",
+            "45710": "전라북도 완주군",
+            "45720": "전라북도 진안군",
+            "45730": "전라북도 무주군",
+            "45740": "전라북도 장수군",
+            "45750": "전라북도 임실군",
+            "45770": "전라북도 순창군",
+            "45790": "전라북도 고창군",
+            "45800": "전라북도 부안군",
+            
+            # 경상남도  
+            "48000": "경상남도",
+            "48120": "경상남도 진주시",
+            "48125": "경상남도 창원시",  # 마산시 포함
+            "48127": "경상남도 통영시",
+            "48129": "경상남도 사천시",
+            "48170": "경상남도 김해시",
+            "48220": "경상남도 밀양시",
+            "48240": "경상남도 거제시",
+            "48250": "경상남도 양산시",
+            "48720": "경상남도 의령군",
+            "48730": "경상남도 함안군",
+            "48740": "경상남도 창녕군",
+            "48820": "경상남도 고성군",
+            "48840": "경상남도 남해군",
+            "48850": "경상남도 하동군",
+            "48860": "경상남도 산청군",
+            "48870": "경상남도 함양군",
+            "48880": "경상남도 거창군",
+            "48890": "경상남도 합천군",
+        }
+        
+        # 상세 코드 먼저 확인
+        if area_code in detailed_area_map:
+            return detailed_area_map[area_code]
+        
         # 5자리 지역코드인 경우 앞 2자리만 사용
         if len(area_code) == 5:
             area_code = area_code[:2]
@@ -123,6 +167,41 @@ class NaraiteoAPI:
                     return region + "광역시" if region != "서울" else "서울특별시"
                 else:
                     return region
+        
+        return ""
+    
+    def _extract_region_from_contents(self, contents: str) -> str:
+        """게시글 내용에서 상세 지역 정보 추출"""
+        if not contents:
+            return ""
+        
+        import re
+        
+        # 상세 지역 정보 패턴들 (우선순위 순)
+        patterns = [
+            # "전라북도 임실군", "경상남도 마산시" 등 (공백 포함)
+            r"([가-힣]+도)\s+([가-힣]+[시군구])",
+            # "경기도 화성시", "충청남도 천안시" 등  
+            r"([가-힣]+도)\s+([가-힣]+시)",
+            # "서울특별시 강남구", "부산광역시 해운대구" 등
+            r"([가-힣]+[특별광역]시)\s+([가-힣]+구)",
+            # "임실우체국", "마산병원" 등에서 지역명 추출
+            r"([가-힣]+)[우체국|병원|교도소|법원|경찰서]",
+            # "임실군", "마산시" 등 단독
+            r"([가-힣]+[시군구])",
+            # "전라북도", "경상남도" 등
+            r"([가-힣]+도)",
+            # "서울특별시", "부산광역시" 등
+            r"([가-힣]+[특별광역]시)"
+        ]
+        
+        for pattern in patterns:
+            matches = re.findall(pattern, contents)
+            if matches:
+                if isinstance(matches[0], tuple):
+                    return " ".join(matches[0])
+                else:
+                    return matches[0]
         
         return ""
     
@@ -231,21 +310,40 @@ class NaraiteoAPI:
         if item is None:
             return None
         
+        # 상세에서 지역 정보 추출
+        area_nm = self._text(item, "areaNm")
+        area_code = self._text(item, "areaCode")
+        work_addr = self._text(item, "workAddr")  # 상세 근무주소 추가
+        contents = self._text(item, "contents")
+        
+        # 지역 정보 우선순위: workAddr(상세주소) > area_nm(API제공) > 지역코드변환 > 정보없음
+        if work_addr:
+            # 상세 근무주소가 있으면 우선 사용
+            work_region = work_addr
+        elif area_nm:
+            # areaNm이 있으면 그대로 사용
+            work_region = area_nm
+        elif area_code:
+            # 지역코드를 지역명으로 변환
+            work_region = self._convert_area_code_to_name(area_code)
+        else:
+            work_region = "정보없음"
+        
         detail_data = {
             "idx": idx,
             "title": self._text(item, "title"),
-            "contents": self._text(item, "contents"),
+            "contents": contents,
             "dept_name": self._text(item, "deptName"),
             "reg_date": self._text(item, "regdate"),
             "end_date": self._text(item, "enddate"),
             "read_count": int(self._text(item, "readnum", "0")),
-            "area_name": self._text(item, "areaNm"),     # 상세에서 제공되는 지역명
-            "grade": self._text(item, "grade"),
-            "work_region": self._text(item, "workRegion"),
+            "area_name": area_nm,           # 상세에서 제공되는 지역명
+            "area_code": area_code,         # 상세에서 제공되는 지역코드
+            "work_region": work_region,     # 가장 상세한 지역 정보 사용
             "updated_at": datetime.now().isoformat()
         }
         
-        print(f"[상세 조회] 공고 ID {idx} 상세정보 획득")
+        print(f"[상세 조회] 공고 ID {idx} 상세정보 획득 - 근무지역: {work_region}")
         return detail_data
     
     def get_job_files(self, idx: str) -> List[Dict]:
@@ -264,16 +362,67 @@ class NaraiteoAPI:
         items = root.findall(".//item")
         
         for item in items:
+            filename = self._text(item, "filename")
+            filepath = self._text(item, "filepath")
+            filesize = self._text(item, "filesize")
+            
+            # API 가이드에 따라 완전한 다운로드 URL 구성
+            # 형식: https://www.gojobs.go.kr/downFile.do?filenm=파일명&uuid=값&saveGbn=employ
+            if filepath:
+                # filepath에서 uuid와 saveGbn 추출 (API 응답 형식에 따라)
+                if "downFile.do" in filepath:
+                    download_url = f"https://www.gojobs.go.kr/{filepath}"
+                else:
+                    # filepath가 부분적인 경우, 완전한 URL 구성
+                    download_url = f"https://www.gojobs.go.kr/downFile.do?filenm={filename}&uuid={filepath}&saveGbn=employ"
+            else:
+                download_url = ""
+            
             file_data = {
-                "filename": self._text(item, "filename"),
-                "filepath": self._text(item, "filepath"),
-                "filesize": self._text(item, "filesize"),
+                "filename": filename,
+                "filepath": filepath,  # 원본 filepath 보존
+                "download_url": download_url,  # 완전한 다운로드 URL 추가
+                "filesize": filesize,
                 "job_idx": idx
             }
             files.append(file_data)
         
         print(f"[첨부파일] 공고 ID {idx}: {len(files)}개 파일")
         return files
+    
+    def get_job_position(self, idx: str) -> Optional[Dict]:
+        """채용직급 정보 조회 - 정확한 채용직급과 인원수 정보"""
+        params = {"idx": idx}
+        
+        root = self._make_request("getItemPosition", params)
+        if not root:
+            return None
+        
+        item = root.find(".//item")
+        if item is None:
+            return None
+        
+        name = self._text(item, "name")
+        cnt = self._text(item, "cnt")
+        
+        # 원본 그대로 조합: "간호서기" + "4명" = "간호서기 4명"
+        if cnt and cnt != "0":
+            full_grade = f"{name} {cnt}명"
+        else:
+            full_grade = name
+        
+        position_data = {
+            "idx": idx,
+            "parentidx": self._text(item, "parentidx"),
+            "code": self._text(item, "code"),
+            "name": name,
+            "cnt": cnt,
+            "full_grade": full_grade,  # 완전한 채용직급 정보
+            "updated_at": datetime.now().isoformat()
+        }
+        
+        print(f"[채용직급] 공고 ID {idx}: {full_grade}")
+        return position_data
     
     def get_enriched_jobs(self, limit: int = 10) -> List[Dict]:
         """상세정보가 보강된 채용공고 목록"""
