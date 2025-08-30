@@ -34,18 +34,23 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
+    - name: Create Firebase credentials
+      env:
+        FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+      run: |
+        echo "$FIREBASE_CREDENTIALS" > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
+    
     - name: Run data cleanup
       env:
         GITHUB_ACTIONS: true
-        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-        FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
-        FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-        FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-        FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
-        FIREBASE_CLIENT_CERT_URL: ${{ secrets.FIREBASE_CLIENT_CERT_URL }}
       run: |
         echo "🧹 30일 지난 게시글 정리 시작..."
         python data_cleanup.py
+    
+    - name: Clean up credentials
+      if: always()
+      run: |
+        rm -f job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
         
     - name: Report cleanup results
       run: |
