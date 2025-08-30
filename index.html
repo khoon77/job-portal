@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; connect-src 'self' https:; img-src 'self' data: https:;">
-    <title>나라일터 채용정보</title>
+    <title>대한민국 공공일터 채용정보</title>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -68,12 +68,22 @@
         }
         
         .title-highlight {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #1e40af;
             font-weight: 800;
-            text-shadow: none;
+            text-shadow: 2px 2px 4px rgba(30, 64, 175, 0.2);
+        }
+        
+        .title-special {
+            color: #dc2626;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-weight: 600;
+            text-decoration: underline;
+            text-decoration-color: #dc2626;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 3px;
+            text-shadow: 1px 1px 3px rgba(220, 38, 38, 0.3);
+            letter-spacing: 1px;
         }
 
         .header p {
@@ -1461,7 +1471,7 @@
     <div class="header">
         <div class="header-content">
             <div class="header-text">
-                <h1><span class="header-icon">🏛️</span><span class="title-highlight">우리나라</span> 공공일터 채용정보</h1>
+                <h1><span class="header-icon">🏛️</span><span class="title-highlight">대한민국</span> <span class="title-special">공공일터</span> <span class="title-highlight">채용정보</span></h1>
                 
                 <!-- 기관 유형 필터 -->
                 <div class="agency-filter">
