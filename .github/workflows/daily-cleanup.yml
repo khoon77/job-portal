@@ -2,8 +2,8 @@ name: Daily Data Cleanup
 
 on:
   schedule:
-    # 매일 오전 2시에 실행 (KST 11시 = UTC 2시)
-    - cron: '0 2 * * *'
+    # 매일 서울 오전 0시에 실행 (KST 00:00 = UTC 15:00 전날)
+    - cron: '0 15 * * *'
   
   # 수동 실행 가능
   workflow_dispatch:

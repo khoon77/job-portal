@@ -54,8 +54,8 @@ jobs:
 
   cleanup-old-data:
     runs-on: ubuntu-latest
-    # 매일 오전 1시에만 실행
-    if: github.event.schedule == '0 1 * * *'
+    # 매일 서울 오전 0시에만 실행 (KST 00:00 = UTC 15:00 전날)
+    if: github.event.schedule == '0 15 * * *'
     
     steps:
     - name: Checkout repository
