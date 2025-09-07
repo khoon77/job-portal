@@ -1,9 +1,4 @@
-"""
-Firebase 데이터 정리 스크립트
-- 매일 대한민국 서울시각 기준 0시에 실행
-- 등록일 기준 30일 지난 게시글 자동 삭제
-- 30일이 안 지난 게시글들은 현행유지
-"""
+
 import os
 import sys
 import firebase_admin
