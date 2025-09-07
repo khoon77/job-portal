@@ -717,43 +717,6 @@
             padding: 30px;
         }
 
-        /* 광고 영역 스타일 */
-        .ad-container {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ad-placeholder {
-            color: #6c757d;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* 상단 광고 (체크박스 바로 아래) */
-        .ad-top {
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-
-        /* 중단 광고 (통계박스 아래) */
-        .ad-middle {
-            margin-top: 30px;
-            margin-bottom: 30px;
-        }
-
-        /* 하단 광고 */
-        .ad-bottom {
-            margin-top: 40px;
-            margin-bottom: 20px;
-        }
 
         /* 체크박스 필터 스타일 */
         .filter-section {
@@ -1729,9 +1692,7 @@
     <div class="header">
         <div class="header-content">
             <div class="header-text">
-                <h1><span class="header-icon">🏛️</span><span class="title-highlight">대한민국</span> <span class="title-special">공공일터</span> <span class="title-highlight">채용정보</span></h1>
-                <p>국가, 공공기관, 지자체 채용정보를 한 곳에서 확인 가능~^^</p>
-                
+                <h1><span class="header-icon">🏛️</span><span class="title-highlight">대한민국</span> <span class="title-special">정부기관</span> <span class="title-highlight">채용정보</span></h1>
                 <!-- 기관 유형 필터 -->
                 <div class="agency-filter">
                     <div class="filter-item">
@@ -1747,29 +1708,13 @@
                         <label for="filter-local" class="filter-label" onclick="showConnectingSoonMessage('지자체')">지자체</label>
                     </div>
                 </div>
+                <p>정부기관, 공공기관, 지자체 채용정보를 한 곳에서 확인 가능~^^</p>
             </div>
         </div>
     </div>
 
     <!-- 메인 컨테이너 -->
     <div class="container">
-        <!-- 상단 광고 영역 (체크박스 바로 아래) -->
-        <div class="ad-container ad-top">
-            <div class="ad-placeholder">
-                <!-- Google AdSense 광고 코드 삽입 위치 -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-YOUR-PUBLISHER-ID"
-                     data-ad-slot="YOUR-AD-SLOT-ID"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-                <!-- 개발 중에는 플레이스홀더 텍스트 표시 -->
-                <span>[상단 광고 영역 - 728x90]</span>
-            </div>
-        </div>
         <!-- 제어 패널 -->
         <div class="controls">
             <div class="search-box">
@@ -1804,23 +1749,6 @@
             </div>
         </div>
 
-        <!-- 중단 광고 영역 (통계박스 아래) -->
-        <div class="ad-container ad-middle">
-            <div class="ad-placeholder">
-                <!-- Google AdSense 광고 코드 삽입 위치 -->
-                <ins class="adsbygoogle"
-                     style="display:inline-block;width:728px;height:45px"
-                     data-ad-client="ca-pub-YOUR-PUBLISHER-ID"
-                     data-ad-slot="YOUR-AD-SLOT-ID-2"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-                <!-- 개발 중에는 플레이스홀더 텍스트 표시 -->
-                <span>📢 중단 광고 영역 (728x45 배너)</span>
-            </div>
-        </div>
 
         <!-- 정부기관 콘텐츠 영역 (정부기관 선택시 표시) -->
         <div id="governmentContent" style="display: block;">
@@ -3420,24 +3348,5 @@
         });
     </script>
 
-    <!-- 하단 광고 영역 -->
-    <div class="container">
-        <div class="ad-container ad-bottom">
-            <div class="ad-placeholder">
-                <!-- Google AdSense 광고 코드 삽입 위치 -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-YOUR-PUBLISHER-ID"
-                     data-ad-slot="YOUR-AD-SLOT-ID-3"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-                <!-- 개발 중에는 플레이스홀더 텍스트 표시 -->
-                <span>[하단 광고 영역 - 728x90]</span>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
