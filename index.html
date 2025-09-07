@@ -1188,6 +1188,31 @@
             gap: 15px;
             margin-top: 25px;
             justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-info {
+            width: 100%;
+            text-align: center;
+            margin: 15px 0 10px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e3a8a;
+            letter-spacing: -0.3px;
+            animation: fadeInUp 0.8s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .filter-item {
@@ -1715,8 +1740,10 @@
                         <input type="checkbox" id="filter-local" class="agency-checkbox" disabled onclick="showConnectingSoonMessage('지자체')">
                         <label for="filter-local" class="filter-label" onclick="showConnectingSoonMessage('지자체')">지자체</label>
                     </div>
+                    <div class="filter-info">
+                        🎯 국가, 공공기관, 지자체 채용정보 모두를 이 사이트에서 확인 가능~^^
+                    </div>
                 </div>
-                <p>정부기관, 공공기관, 지자체 채용정보를 한 곳에서 확인 가능~^^</p>
             </div>
         </div>
     </div>
