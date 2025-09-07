@@ -44,7 +44,7 @@ jobs:
       env:
         GITHUB_ACTIONS: true
       run: |
-        echo "🧹 30일 지난 게시글 정리 시작..."
+        echo "# 30일 지난 게시글 정리 시작..."
         python data_cleanup.py
     
     - name: Clean up credentials
