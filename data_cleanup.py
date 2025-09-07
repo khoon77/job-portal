@@ -1,13 +1,15 @@
 """
 Firebase 데이터 정리 스크립트
-- 등록일 기준 30일 지난 게시글 삭제
-- 단, 마감일이 안 지난 게시글은 유지
+- 매일 대한민국 서울시각 기준 0시에 실행
+- 등록일 기준 30일 지난 게시글 자동 삭제
+- 30일이 안 지난 게시글들은 현행유지
 """
 import os
 import sys
 import firebase_admin
 from firebase_admin import credentials, firestore
 from datetime import datetime, timedelta
+import pytz
 import time
 
 def initialize_firebase():
@@ -41,23 +43,31 @@ def parse_date_string(date_str):
     except:
         return None
 
+def get_seoul_time():
+    """대한민국 서울 시각 기준 현재 날짜 반환"""
+    seoul_tz = pytz.timezone('Asia/Seoul')
+    return datetime.now(seoul_tz).replace(tzinfo=None)
+
 def cleanup_old_jobs():
-    """오래된 게시글 정리"""
+    """30일 지난 게시글 정리 (서울시각 기준)"""
     print("=" * 70)
-    print("🧹 Firebase 데이터 정리 시작")
-    print(f"⏰ 실행 시간: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("🧹 Firebase 데이터 정리 시작 (서울시각 기준)")
+    
+    # 서울 시각으로 현재 시간 계산
+    seoul_now = get_seoul_time()
+    print(f"⏰ 서울 시각: {seoul_now.strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 70)
     
     try:
         # Firebase 초기화
         db = initialize_firebase()
         
-        # 현재 날짜
-        today = datetime.now()
+        # 현재 날짜 (서울 시각 기준)
+        today = seoul_now.date()
         cutoff_date = today - timedelta(days=30)  # 30일 전
         
-        print(f"📅 기준일: {today.strftime('%Y-%m-%d')}")
-        print(f"📅 삭제 기준: {cutoff_date.strftime('%Y-%m-%d')} 이전 등록")
+        print(f"📅 기준일 (서울시각): {today.strftime('%Y-%m-%d')}")
+        print(f"📅 삭제 대상: {cutoff_date.strftime('%Y-%m-%d')} 이전 등록 게시글")
         
         # 모든 게시글 조회
         print("📋 모든 게시글 조회 중...")
@@ -73,38 +83,35 @@ def cleanup_old_jobs():
             doc_id = doc.id
             
             # 등록일 확인
-            reg_start_date = parse_date_string(data.get('reg_start_date'))
-            reg_end_date = parse_date_string(data.get('reg_end_date'))  # 마감일
+            reg_date = parse_date_string(data.get('reg_date'))
             
             # 등록일이 30일 이상 지났는지 확인
-            if reg_start_date and reg_start_date < cutoff_date:
-                # 마감일이 아직 안 지났으면 보존
-                if reg_end_date and reg_end_date >= today:
-                    preserved_count += 1
-                    print(f"   💾 보존: {data.get('title', '')[:50]} (마감일: {reg_end_date.strftime('%Y-%m-%d')})")
-                else:
-                    # 삭제 대상
-                    candidates_for_deletion.append({
-                        'id': doc_id,
-                        'title': data.get('title', '')[:50],
-                        'reg_start_date': reg_start_date.strftime('%Y-%m-%d') if reg_start_date else 'N/A',
-                        'reg_end_date': reg_end_date.strftime('%Y-%m-%d') if reg_end_date else 'N/A'
-                    })
+            if reg_date and reg_date.date() <= cutoff_date:
+                # 삭제 대상
+                candidates_for_deletion.append({
+                    'id': doc_id,
+                    'title': data.get('title', '')[:50],
+                    'reg_date': reg_date.strftime('%Y-%m-%d') if reg_date else 'N/A',
+                    'company': data.get('company', '')[:30]
+                })
+            else:
+                # 30일이 안 지난 게시글은 현행유지
+                preserved_count += 1
         
         print(f"📊 전체 게시글: {total_count}개")
-        print(f"📊 삭제 대상: {len(candidates_for_deletion)}개")
-        print(f"📊 마감일로 보존: {preserved_count}개")
+        print(f"📊 삭제 대상 (30일 초과): {len(candidates_for_deletion)}개")
+        print(f"📊 현행유지 (30일 이내): {preserved_count}개")
         
         # 삭제 실행
         deleted_count = 0
         if candidates_for_deletion:
-            print("\n🗑️ 삭제 실행 중...")
+            print("\n🗑️ 30일 지난 게시글 삭제 실행 중...")
             
             for job in candidates_for_deletion:
                 try:
                     db.collection('jobs').document(job['id']).delete()
                     deleted_count += 1
-                    print(f"   ✅ 삭제: {job['title']} (등록: {job['reg_start_date']}, 마감: {job['reg_end_date']})")
+                    print(f"   ✅ 삭제: {job['title']} | {job['company']} | 등록일: {job['reg_date']}")
                     
                     # 삭제 간격 (Rate Limiting)
                     time.sleep(0.1)
@@ -112,8 +119,10 @@ def cleanup_old_jobs():
                 except Exception as e:
                     print(f"   ❌ 삭제 실패 {job['id']}: {e}")
                     continue
+        else:
+            print("\n💡 30일 지난 게시글이 없습니다. 모든 게시글이 현행유지됩니다.")
         
-        print(f"\n✅ 정리 완료: {deleted_count}개 삭제됨")
+        print(f"\n✅ 정리 완료: {deleted_count}개 삭제됨, {preserved_count}개 현행유지")
         
     except Exception as e:
         print(f"❌ 데이터 정리 오류: {e}")
@@ -123,7 +132,7 @@ def main():
     """메인 함수"""
     try:
         cleanup_old_jobs()
-        print("🎉 데이터 정리 완료")
+        print("🎉 데이터 정리 작업 완료 (서울시각 기준)")
         
     except Exception as e:
         print(f"💥 치명적 오류: {e}")
