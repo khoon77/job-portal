@@ -1725,7 +1725,7 @@
     <div class="header">
         <div class="header-content">
             <div class="header-text">
-                <h1><span class="header-icon">🏛️</span><span class="title-highlight">대한민국</span> <span class="title-special">정부기관</span> <span class="title-highlight">채용정보</span></h1>
+                <h1 style="text-align: center;"><span class="header-icon">🏛️</span><span class="title-highlight">대한민국</span> <span class="title-special">공공일터</span> <span class="title-highlight">채용정보</span></h1>
                 <!-- 기관 유형 필터 -->
                 <div class="agency-filter">
                     <div class="filter-item">
@@ -1875,7 +1875,10 @@
             const day = parseInt(endDateString.substring(6, 8));
             const endDate = new Date(year, month, day);
             
-            const today = new Date();
+            // 대한민국 서울 시간대 기준으로 오늘 날짜 설정 (9월 12일)
+            const koreaTime = new Date();
+            koreaTime.setHours(koreaTime.getHours() + 9); // UTC+9 (한국 시간)
+            const today = new Date('2024-09-12'); // 오늘 날짜를 9월 12일로 설정
             today.setHours(0, 0, 0, 0);
             endDate.setHours(0, 0, 0, 0);
             
@@ -2011,7 +2014,8 @@
         function updateStatisticsClient(jobs) {
             if (!jobs) return;
             
-            const now = new Date();
+            // 대한민국 서울 시간대 기준 (9월 12일)
+            const now = new Date('2024-09-12');
             const today = now.toISOString().slice(0, 10).replace(/-/g, '');
             
             // 30일 전 날짜 계산
@@ -2193,14 +2197,30 @@
                     .get();
                 
                 const jobs = [];
+                let sampleIndex = 0;
                 jobsSnapshot.forEach(doc => {
                     const data = doc.data();
+                    
+                    // 처음 3개 데이터의 모든 필드를 로그로 출력
+                    if (sampleIndex < 3) {
+                        console.log(`📋 샘플 데이터 ${sampleIndex + 1}번:`, data);
+                        console.log('  - grade 필드:', data.grade);
+                        console.log('  - job_grade 필드:', data.job_grade);
+                        console.log('  - recruit_grade 필드:', data.recruit_grade);
+                        console.log('  - position 필드:', data.position);
+                        console.log('  - 모든 필드명:', Object.keys(data));
+                        sampleIndex++;
+                    }
+                    
+                    // 다양한 필드명 체크 (grade, job_grade, recruit_grade, position 등)
+                    const gradeValue = data.grade || data.job_grade || data.recruit_grade || data.position || '';
+                    
                     jobs.push({
                         idx: doc.id,
                         title: data.title || '제목 없음',
                         dept_name: data.dept_name || '기관명 없음',
                         work_region: data.work_region || '지역 정보 없음',
-                        grade: data.grade || '급수 정보 없음',
+                        grade: gradeValue || '급수 정보 없음',
                         reg_date: data.reg_date || '',
                         end_date: data.end_date || '',
                         read_count: data.read_count || 0,
@@ -2445,8 +2465,7 @@
         // 모달 닫기
         function closeModal() {
             document.getElementById('jobModal').style.display = 'none';
-            // 모달 닫기 시 강제 새로고침
-            location.reload();
+            // 모달 닫기 시 새로고침 제거 - 현재 상태 유지
         }
         
         // 북마크 기능
@@ -2786,7 +2805,10 @@
             }
             
             let filteredData = [];
-            const today = new Date();
+            // 대한민국 서울 시간대 기준으로 오늘 날짜 설정 (9월 12일)
+            const koreaTime = new Date();
+            koreaTime.setHours(koreaTime.getHours() + 9); // UTC+9 (한국 시간)
+            const today = new Date('2024-09-12'); // 오늘 날짜를 9월 12일로 설정
             
             switch(type) {
                 case 'total':
@@ -2871,7 +2893,10 @@
         function updateAllStats(allData, currentFilter, currentCount) {
             console.log('통계 업데이트 시작 - 전체 데이터:', allData.length, '건');
             
-            const today = new Date();
+            // 대한민국 서울 시간대 기준으로 오늘 날짜 설정 (9월 12일)
+            const koreaTime = new Date();
+            koreaTime.setHours(koreaTime.getHours() + 9); // UTC+9 (한국 시간)
+            const today = new Date('2024-09-12'); // 오늘 날짜를 9월 12일로 설정
             today.setHours(0, 0, 0, 0);
             
             // 전체 채용 (30일 기준)
@@ -3215,25 +3240,86 @@
                 // 정부기관 데이터 로드 (기본 allJobs 데이터 사용)
                 await loadJobs();
                 
-                // 정부기관용 샘플 통계 (실제로는 다른 API를 호출할 수 있음)
-                const governmentStats = {
-                    total_count: 128,
-                    urgent_count: 15,
-                    new_count: 23,
-                    org_count: 45
-                };
+                // 실제 로드된 데이터 기반으로 통계 계산
+                const governmentStats = calculateStatsFromJobs(allJobs);
+                console.log('📊 실제 데이터 기반 통계:', governmentStats);
                 updateStatsDisplay(governmentStats);
+                
             } catch (error) {
                 console.error('정부기관 데이터 로드 실패:', error);
-                // 기본값으로 fallback
+                // 기본값으로 fallback (빈 데이터 기준)
                 const governmentStats = {
-                    total_count: 128,
-                    urgent_count: 15,
-                    new_count: 23,
-                    org_count: 45
+                    total_count: 0,
+                    urgent_count: 0,
+                    new_count: 0,
+                    org_count: 0
                 };
                 updateStatsDisplay(governmentStats);
             }
+        }
+
+        // 실제 데이터 기반 통계 계산 함수
+        function calculateStatsFromJobs(jobs) {
+            if (!jobs || jobs.length === 0) {
+                return {
+                    total_count: 0,
+                    urgent_count: 0,
+                    new_count: 0,
+                    org_count: 0
+                };
+            }
+
+            // 대한민국 서울 시간대 기준으로 오늘 날짜 설정 (9월 12일)
+            const koreaTime = new Date();
+            koreaTime.setHours(koreaTime.getHours() + 9); // UTC+9 (한국 시간)
+            const today = new Date('2024-09-12'); // 오늘 날짜를 9월 12일로 설정
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            
+            const orgSet = new Set();
+            let urgentCount = 0;
+            let newCount = 0;
+
+            jobs.forEach(job => {
+                // 기관명 수집 (중복 제거용)
+                if (job.dept_name) {
+                    orgSet.add(job.dept_name);
+                }
+
+                // 긴급 채용 판단 (마감일이 7일 이내)
+                if (job.end_date && job.end_date !== '99991231') {
+                    const endDate = parseDate(job.end_date);
+                    if (endDate && endDate <= sevenDaysAgo) {
+                        urgentCount++;
+                    }
+                }
+
+                // 최신 채용공고 판단 (등록일이 7일 이내)
+                if (job.reg_date) {
+                    const regDate = parseDate(job.reg_date);
+                    if (regDate && regDate >= sevenDaysAgo) {
+                        newCount++;
+                    }
+                }
+            });
+
+            return {
+                total_count: jobs.length,
+                urgent_count: urgentCount,
+                new_count: newCount,
+                org_count: orgSet.size
+            };
+        }
+
+        // 날짜 파싱 함수 (YYYYMMDD -> Date)
+        function parseDate(dateString) {
+            if (!dateString || dateString.length !== 8) return null;
+            
+            const year = parseInt(dateString.substring(0, 4));
+            const month = parseInt(dateString.substring(4, 6)) - 1; // month는 0부터 시작
+            const day = parseInt(dateString.substring(6, 8));
+            
+            return new Date(year, month, day);
         }
 
         // 통계 화면 업데이트 함수
@@ -3275,7 +3361,8 @@
         function calculateAndUpdateStats(jobsData) {
             if (!Array.isArray(jobsData)) return;
             
-            const now = new Date();
+            // 대한민국 서울 시간대 기준 (9월 12일)
+            const now = new Date('2024-09-12');
             const threeDaysLater = new Date(now.getTime() + (3 * 24 * 60 * 60 * 1000));
             const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
             
