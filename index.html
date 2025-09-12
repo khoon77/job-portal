@@ -1750,16 +1750,6 @@
 
     <!-- 메인 컨테이너 -->
     <div class="container">
-        <!-- 제어 패널 -->
-        <div class="controls">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="기관명이나 제목으로 검색하세요..." />
-            </div>
-            <button class="load-btn" id="loadBtn" onclick="loadJobs()">
-                채용공고 불러오기
-            </button>
-        </div>
-
         <!-- 통계 섹션 -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -1784,6 +1774,15 @@
             </div>
         </div>
 
+        <!-- 제어 패널 (검색창) -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="기관명이나 제목으로 검색하세요..." />
+            </div>
+            <button class="load-btn" id="loadBtn" onclick="loadJobs()">
+                채용공고 불러오기
+            </button>
+        </div>
 
         <!-- 정부기관 콘텐츠 영역 (정부기관 선택시 표시) -->
         <div id="governmentContent" style="display: block;">
