@@ -1657,16 +1657,15 @@
                 <!-- 기관 유형 필터 - 탭 스타일 -->
                 <div class="agency-filter">
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-government" class="agency-checkbox" disabled>
-                        <label for="filter-government" class="tab-label disabled" onclick="showComingSoon(this, event)">
+                        <input type="checkbox" id="filter-government" class="agency-checkbox" checked>
+                        <label for="filter-government" class="tab-label" onclick="handleAgencyClick('government', event)">
                             <span class="filter-icon">🏛️</span>
                             <span class="filter-label">정부기관</span>
-                            <div class="coming-soon-tooltip">연결예정</div>
                         </label>
                     </div>
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-public" class="agency-checkbox" checked>
-                        <label for="filter-public" class="tab-label">
+                        <input type="checkbox" id="filter-public" class="agency-checkbox">
+                        <label for="filter-public" class="tab-label" onclick="handleAgencyClick('public', event)">
                             <span class="filter-icon">🏢</span>
                             <span class="filter-label">공공기관</span>
                         </label>
@@ -2554,7 +2553,27 @@
                 tooltip.classList.add('show');
                 setTimeout(() => {
                     tooltip.classList.remove('show');
-                }, 2000);
+                }, 200);
+            }
+        }
+        
+        // 기관 클릭 처리 함수
+        function handleAgencyClick(agencyType, event) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            if (agencyType === 'public') {
+                // 공공기관 클릭시 public-job.co.kr로 연결
+                window.open('https://public-job.co.kr', '_blank');
+            } else if (agencyType === 'government') {
+                // 정부기관 클릭시 다른 기관들 비활성화
+                const governmentCheckbox = document.getElementById('filter-government');
+                const publicCheckbox = document.getElementById('filter-public');
+                
+                governmentCheckbox.checked = true;
+                publicCheckbox.checked = false;
+                
+                console.log('정부기관 선택됨');
             }
         }
 
