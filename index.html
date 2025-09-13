@@ -1229,6 +1229,164 @@
                 font-size: 13px;
             }
         }
+
+        /* 푸터 스타일 */
+        .footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #e2e8f0;
+            margin-top: 80px;
+            padding: 60px 0 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+            margin-bottom: 40px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-section {
+            flex: 1;
+        }
+
+        .footer-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-desc {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 60px;
+        }
+
+        .footer-link-group {
+            min-width: 150px;
+        }
+
+        .footer-link-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        .footer-link-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-link-list li {
+            margin-bottom: 12px;
+        }
+
+        .footer-link-list a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+        }
+
+        .footer-link-list a:hover {
+            color: #3b82f6;
+            transform: translateX(5px);
+        }
+
+        .footer-link-list a::before {
+            content: '→';
+            position: absolute;
+            left: -20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link-list a:hover::before {
+            opacity: 1;
+            left: -15px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        .footer-copyright {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* 푸터 반응형 */
+        @media (max-width: 768px) {
+            .footer {
+                margin-top: 50px;
+                padding: 40px 0 20px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 30px;
+                width: 100%;
+            }
+
+            .footer-title {
+                font-size: 20px;
+            }
+
+            .footer-link-title {
+                font-size: 15px;
+            }
+
+            .footer-link-list a {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer {
+                padding: 30px 0 20px;
+            }
+
+            .footer-title {
+                font-size: 18px;
+            }
+
+            .footer-desc {
+                font-size: 13px;
+            }
+
+            .footer-copyright {
+                font-size: 12px;
+            }
+        }
         
         /* 페이지네이션 */
         .pagination {
@@ -2859,5 +3017,39 @@
             loadJobs();
         });
     </script>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">대한민국 정부기관 채용정보</h3>
+                    <p class="footer-desc">정부기관의 모든 채용정보를 한곳에서</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-link-group">
+                        <h4 class="footer-link-title">서비스 정보</h4>
+                        <ul class="footer-link-list">
+                            <li><a href="about.html">사이트 소개</a></li>
+                            <li><a href="contact.html">문의하기</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-link-group">
+                        <h4 class="footer-link-title">이용 안내</h4>
+                        <ul class="footer-link-list">
+                            <li><a href="terms.html">이용약관</a></li>
+                            <li><a href="privacy.html">개인정보처리방침</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2025 대한민국 정부기관 채용정보. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
