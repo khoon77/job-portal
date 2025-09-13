@@ -1846,16 +1846,6 @@
 
     <!-- 메인 컨테이너 -->
     <div class="container">
-        <!-- 제어 패널 -->
-        <div class="controls">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="기관명이나 제목으로 검색하세요..." />
-            </div>
-            <button class="load-btn" id="loadBtn" onclick="loadJobs()">
-                채용공고 불러오기
-            </button>
-        </div>
-
         <!-- 통계 섹션 -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -1878,6 +1868,16 @@
                 <div class="stat-label">등록기관</div>
                 <div class="stat-sublabel">(중복제외)</div>
             </div>
+        </div>
+
+        <!-- 제어 패널 -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="기관명, 채용제목으로 검색..." />
+            </div>
+            <button class="load-btn" id="loadBtn" onclick="searchJobs()">
+                📥 검색 조회
+            </button>
         </div>
 
         <!-- 채용공고 섹션 -->
@@ -2199,7 +2199,7 @@
                 </div>
             `;
             loadBtn.disabled = true;
-            loadBtn.textContent = '불러오는 중...';
+            loadBtn.textContent = '🔄 검색 중...';
             
             try {
                 console.log('🔥 Firebase에서 실시간 데이터 로딩 중...');
@@ -2245,7 +2245,7 @@
                 
             } finally {
                 loadBtn.disabled = false;
-                loadBtn.textContent = '새로고침';
+                loadBtn.textContent = '📥 검색 조회';
             }
         }
 
@@ -2287,7 +2287,6 @@
                 console.log('📡 서버에서 최신 데이터 요청 중...');
                 const jobsSnapshot = await db.collection('jobs')
                     .orderBy('reg_date', 'desc')
-                    .limit(1000)
                     .get({
                         source: 'server'  // 서버에서 실시간 데이터 강제 조회
                     });
@@ -2319,77 +2318,31 @@
             } catch (error) {
                 console.error('❌ Firebase 데이터 가져오기 실패:', error);
                 
-                // Firebase 연결 실패시 샘플 데이터 반환
-                console.log('🔄 샘플 데이터로 대체');
-                return getSampleJobs();
+                // Firebase 연결 실패시 빈 배열 반환
+                console.log('🔄 Firebase 연결 실패');
+                alert('채용공고 데이터를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
+                return [];
             }
         }
 
-        // 샘플 채용공고 데이터 (Firebase 연결 실패시 대체)
-        function getSampleJobs() {
-            return [
-                {
-                    idx: 'sample1',
-                    title: '2024년 서울특별시 9급 공무원 채용',
-                    dept_name: '서울특별시',
-                    work_region: '서울시 전체',
-                    grade: '9급',
-                    reg_date: '20241201',
-                    end_date: '20241231',
-                    read_count: 1520,
-                    etc_info: 'Y||N'
-                },
-                {
-                    idx: 'sample2',
-                    title: '국민연금공단 계약직 직원 채용',
-                    dept_name: '국민연금공단',
-                    work_region: '전국',
-                    grade: '7급 상당',
-                    reg_date: '20241205',
-                    end_date: '20241225',
-                    read_count: 890,
-                    etc_info: 'N||Y'
-                },
-                {
-                    idx: 'sample3',
-                    title: '인천광역시 교육청 교육전문직원 채용',
-                    dept_name: '인천광역시교육청',
-                    work_region: '인천시',
-                    grade: '6급',
-                    reg_date: '20241210',
-                    end_date: '20241230',
-                    read_count: 445,
-                    etc_info: 'N||N'
-                },
-                {
-                    idx: 'sample4',
-                    title: '한국수력원자력(주) 신입직원 채용',
-                    dept_name: '한국수력원자력',
-                    work_region: '경주, 울진',
-                    grade: '대졸신입',
-                    reg_date: '20241215',
-                    end_date: '20250115',
-                    read_count: 2340,
-                    etc_info: 'Y||Y'
-                },
-                {
-                    idx: 'sample5',
-                    title: '부산광역시 중구청 임기제공무원 채용',
-                    dept_name: '부산광역시 중구청',
-                    work_region: '부산시 중구',
-                    grade: '8급',
-                    reg_date: '20241218',
-                    end_date: '20250105',
-                    read_count: 678,
-                    etc_info: 'N||N'
-                }
-            ];
-        }
         
         // 검색 기능
         function searchJobs() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
             
+            // 데이터가 없으면 먼저 로드
+            if (!allJobs || allJobs.length === 0) {
+                loadJobs().then(() => {
+                    performSearch(searchTerm);
+                });
+                return;
+            }
+            
+            performSearch(searchTerm);
+        }
+        
+        // 실제 검색 수행
+        function performSearch(searchTerm) {
             if (!searchTerm) {
                 filteredJobs = [...allJobs];
             } else {
@@ -3006,7 +2959,6 @@
             
             // 검색 이벤트
             const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', searchJobs);
             searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     searchJobs();
