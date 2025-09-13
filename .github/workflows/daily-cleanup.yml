@@ -2,10 +2,10 @@ name: Daily Data Cleanup
 
 on:
   schedule:
-    # 매일 서울 오전 0시에 실행 (KST 00:00 = UTC 15:00 전날)
+    # Run daily at Seoul 00:00 (UTC 15:00 previous day)
     - cron: '0 15 * * *'
   
-  # 수동 실행 가능
+  # Manual execution enabled
   workflow_dispatch:
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
       env:
         GITHUB_ACTIONS: true
       run: |
-        echo "# 30일 지난 게시글 정리 시작..."
+        echo "Starting cleanup of job posts older than 30 days..."
         python data_cleanup.py
     
     - name: Clean up credentials
@@ -54,5 +54,5 @@ jobs:
         
     - name: Report cleanup results
       run: |
-        echo "✅ 데이터 정리 완료"
-        echo "📊 정리 기준: 등록일 30일 경과, 마감일 지남"
+        echo "Data cleanup completed successfully"
+        echo "Cleanup criteria: Posts older than 30 days or past deadline"
