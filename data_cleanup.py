@@ -1,4 +1,9 @@
-
+"""
+Firebase 데이터 정리 스크립트
+- 매일 대한민국 서울시각 기준 0시에 실행
+- 등록일 기준 30일 지난 게시글 자동 삭제
+- 30일이 안 지난 게시글들은 현행유지
+"""
 import os
 import sys
 import firebase_admin
@@ -6,6 +11,7 @@ from firebase_admin import credentials, firestore
 from datetime import datetime, timedelta
 import pytz
 import time
+import re
 
 def initialize_firebase():
     """Firebase 초기화"""
@@ -37,6 +43,25 @@ def parse_date_string(date_str):
         return None
     except:
         return None
+
+def clean_control_characters(text):
+    """제어 문자 제거 및 텍스트 정리"""
+    if not text:
+        return text
+
+    # 문자열로 변환
+    text = str(text)
+
+    # 탭과 줄바꿈은 공백으로 변환
+    text = text.replace('\t', ' ').replace('\n', ' ').replace('\r', ' ')
+
+    # 나머지 제어 문자 제거 (ASCII 0-31, 127)
+    text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text)
+
+    # 연속된 공백을 하나로
+    text = re.sub(r'\s+', ' ', text)
+
+    return text.strip()
 
 def get_seoul_time():
     """대한민국 서울 시각 기준 현재 날짜 반환"""
@@ -73,25 +98,36 @@ def cleanup_old_jobs():
         preserved_count = 0
         
         for doc in docs:
-            total_count += 1
-            data = doc.to_dict()
-            doc_id = doc.id
-            
-            # 등록일 확인
-            reg_date = parse_date_string(data.get('reg_date'))
-            
-            # 등록일이 30일 이상 지났는지 확인
-            if reg_date and reg_date.date() <= cutoff_date:
-                # 삭제 대상
-                candidates_for_deletion.append({
-                    'id': doc_id,
-                    'title': data.get('title', '')[:50],
-                    'reg_date': reg_date.strftime('%Y-%m-%d') if reg_date else 'N/A',
-                    'company': data.get('company', '')[:30]
-                })
-            else:
-                # 30일이 안 지난 게시글은 현행유지
-                preserved_count += 1
+            try:
+                total_count += 1
+                data = doc.to_dict()
+                doc_id = doc.id
+
+                # 제어 문자 제거
+                if 'title' in data:
+                    data['title'] = clean_control_characters(data['title'])
+                if 'company' in data:
+                    data['company'] = clean_control_characters(data['company'])
+
+                # 등록일 확인
+                reg_date = parse_date_string(data.get('reg_date'))
+
+                # 등록일이 30일 이상 지났는지 확인
+                if reg_date and reg_date.date() <= cutoff_date:
+                    # 삭제 대상
+                    candidates_for_deletion.append({
+                        'id': doc_id,
+                        'title': data.get('title', '')[:50],
+                        'reg_date': reg_date.strftime('%Y-%m-%d') if reg_date else 'N/A',
+                        'company': data.get('company', '')[:30]
+                    })
+                else:
+                    # 30일이 안 지난 게시글은 현행유지
+                    preserved_count += 1
+
+            except Exception as e:
+                print(f"⚠️ 문서 처리 오류 (ID: {doc.id}): {e}")
+                continue
         
         print(f"📊 전체 게시글: {total_count}개")
         print(f"📊 삭제 대상 (30일 초과): {len(candidates_for_deletion)}개")
@@ -126,11 +162,18 @@ def cleanup_old_jobs():
 def main():
     """메인 함수"""
     try:
+        # 이모지 출력 문제 해결을 위한 인코딩 설정
+        if sys.platform == 'win32':
+            import io
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
         cleanup_old_jobs()
         print("🎉 데이터 정리 작업 완료 (서울시각 기준)")
-        
+
     except Exception as e:
         print(f"💥 치명적 오류: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == "__main__":
