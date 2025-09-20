@@ -87,41 +87,63 @@ def is_job_within_30day_criteria(job_data, today, cutoff_date):
 def collect_jobs_with_30day_filter(api, today):
     """
     30일 기준 필터링을 적용하여 게시글 수집
+    최적화: 중복 체크를 먼저 하여 API 호출 최소화
     """
     collected_jobs = []
     page_no = 1
-    max_pages = 10  # 최대 10페이지까지 확인 (1000개)
+    max_pages = 2  # 최대 2페이지까지만 확인 (200개) - 5분 내 처리 가능
     cutoff_date = today - timedelta(days=30)  # 30일 전
-    
+
     print(f"[FILTER] 수집 기준:")
     print(f"   - 기준일: {today.strftime('%Y-%m-%d')}")
     print(f"   - 30일 전: {cutoff_date.strftime('%Y-%m-%d')}")
     print(f"   - 등록일 30일 이내 OR 마감일 미도과 게시글 수집")
-    
+    print(f"   - 최대 {max_pages}페이지 확인 (약 {max_pages*100}개)")
+
+    # Firebase에서 기존 ID 가져오기 (중복 체크용)
+    from firebase_admin import firestore
+    db = firestore.client()
+    existing_ids = get_existing_job_ids(db)
+    print(f"[CACHE] 기존 게시글 {len(existing_ids)}개 캐시 완료")
+
+    total_skipped = 0  # 중복으로 건너뛴 수
+
     while page_no <= max_pages:
-        print(f"[API] 페이지 {page_no} 조회 중...")
-        
+        print(f"\n[API] 페이지 {page_no}/{max_pages} 조회 중...")
+
         # 한 페이지당 100개씩 조회
         jobs = api.get_job_list(page_no=page_no, num_of_rows=100)
-        
+
         if not jobs:
             print(f"   페이지 {page_no}: 게시글 없음, 수집 종료")
             break
-        
+
         print(f"   페이지 {page_no}: {len(jobs)}개 게시글 확인")
-        
+
         page_collected = 0
         page_filtered = 0
-        
-        for job in jobs:
-            # 각 게시글에 대해 상세 정보 조회 (등록일/마감일 정보 필요)
-            detail = api.get_job_detail(job['idx'])
-            if not detail:
+        page_skipped = 0
+
+        for i, job in enumerate(jobs, 1):
+            job_idx = job['idx']
+
+            # 중복 체크 먼저 수행 (API 호출 전!)
+            if job_idx in existing_ids:
+                page_skipped += 1
+                total_skipped += 1
+                if i % 10 == 0:  # 10개마다 진행상황 출력
+                    print(f"     진행: {i}/{len(jobs)} (수집: {page_collected}, 중복제외: {page_skipped})")
                 continue
-            
+
+            # 신규 게시글만 상세 정보 조회
+            detail = api.get_job_detail(job_idx)
+            if not detail:
+                page_filtered += 1
+                continue
+
             # 필터링 기준 적용
             is_valid, reason = is_job_within_30day_criteria(detail, today, cutoff_date)
-            
+
             if is_valid:
                 collected_jobs.append({
                     'basic_info': job,
@@ -129,19 +151,26 @@ def collect_jobs_with_30day_filter(api, today):
                     'reason': reason
                 })
                 page_collected += 1
+                print(f"     [NEW] {job['title'][:30]}... ({reason})")
             else:
                 page_filtered += 1
-            
+
             # API 호출 간격 (Rate Limiting)
             time.sleep(0.3)
-        
-        print(f"   페이지 {page_no} 결과: 수집 {page_collected}개, 제외 {page_filtered}개")
-        
+
+        print(f"   페이지 {page_no} 결과: 수집 {page_collected}개, 중복제외 {page_skipped}개, 필터제외 {page_filtered}개")
+
+        # 조기 종료 조건: 대부분 중복이면 다음 페이지도 중복일 가능성 높음
+        if page_skipped > 80:  # 80% 이상이 중복이면
+            print(f"   [EARLY EXIT] 중복률 {page_skipped}% - 추가 페이지 스킵")
+            break
+
         # 다음 페이지로
         page_no += 1
         time.sleep(0.5)  # 페이지 간 간격
-    
-    print(f"[RESULT] 전체 수집된 게시글: {len(collected_jobs)}개")
+
+    print(f"\n[RESULT] 전체 수집된 게시글: {len(collected_jobs)}개")
+    print(f"[RESULT] 중복으로 건너뛴 게시글: {total_skipped}개")
     return collected_jobs
 
 def sync_new_jobs():
@@ -150,52 +179,37 @@ def sync_new_jobs():
     print("[AUTO SYNC] 30일 기준 필터링 자동 동기화 시작")
     print(f"[TIME] 실행 시간: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 70)
-    
+
     try:
         # Firebase 초기화
         db = initialize_firebase()
-        
-        # 기존 게시글 ID 목록 가져오기
-        print("[INFO] 기존 게시글 ID 목록 조회...")
-        existing_ids = get_existing_job_ids(db)
-        print(f"   기존 게시글: {len(existing_ids)}개")
-        
+
         # 나라일터 API 초기화
         api = NaraiteoAPI()
-        
+
         # 현재 날짜
         today = datetime.now()
-        
-        # 30일 기준 필터링으로 게시글 수집
+
+        # 30일 기준 필터링으로 게시글 수집 (중복 체크 포함)
         print("[API] 30일 기준 필터링 게시글 수집...")
         collected_jobs = collect_jobs_with_30day_filter(api, today)
         
         if not collected_jobs:
-            print("[OK] 30일 기준에 맞는 게시글이 없습니다.")
+            print("[OK] 신규 게시글이 없습니다.")
             return
-        
-        # 신규 게시글 필터링 (기존 DB와 비교)
-        new_jobs = []
-        for job_data in collected_jobs:
-            job_idx = job_data['basic_info']['idx']
-            if job_idx not in existing_ids:
-                new_jobs.append(job_data)
-        
-        print(f"[NEW] 신규 게시글: {len(new_jobs)}개 (전체 수집: {len(collected_jobs)}개)")
-        
-        if not new_jobs:
-            print("[OK] 신규 게시글이 없습니다. 현행 유지")
-            return
-        
+
+        # 이미 중복 체크된 신규 게시글만 있음
+        print(f"[NEW] 신규 게시글: {len(collected_jobs)}개")
+
         # 신규 게시글 완전 데이터 수집 및 Firebase 저장 (V1-4 방식 적용)
         saved_count = 0
-        for i, job_data in enumerate(new_jobs, 1):
+        for i, job_data in enumerate(collected_jobs, 1):
             try:
                 basic_info = job_data['basic_info'].copy()  # 복사본 생성
                 detail_info = job_data['detail_info']
                 reason = job_data['reason']
                 
-                print(f"   [{i}/{len(new_jobs)}] {basic_info['title'][:50]}... ({reason})")
+                print(f"   [{i}/{len(collected_jobs)}] {basic_info['title'][:50]}... ({reason})")
                 
                 # V1-4 방식: 데이터 병합 (덮어쓰기 방지)
                 basic_info.update(detail_info)
