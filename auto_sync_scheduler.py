@@ -187,26 +187,41 @@ def sync_new_jobs():
             print("[OK] 신규 게시글이 없습니다. 현행 유지")
             return
         
-        # 신규 게시글 Firebase 저장
+        # 신규 게시글 완전 데이터 수집 및 Firebase 저장 (V1-4 방식 적용)
         saved_count = 0
         for i, job_data in enumerate(new_jobs, 1):
             try:
-                basic_info = job_data['basic_info']
+                basic_info = job_data['basic_info'].copy()  # 복사본 생성
                 detail_info = job_data['detail_info']
                 reason = job_data['reason']
                 
                 print(f"   [{i}/{len(new_jobs)}] {basic_info['title'][:50]}... ({reason})")
                 
-                # 첨부파일 정보 조회
+                # V1-4 방식: 데이터 병합 (덮어쓰기 방지)
+                basic_info.update(detail_info)
+                
+                # 3단계: 첨부파일 정보 조회 (기존 유지)
                 files = api.get_job_files(basic_info['idx'])
+                basic_info['files'] = files
+                time.sleep(0.3)
+
+                # 4단계: 채용직급 정보 조회 (V1-4 핵심 추가 기능)
+                position = api.get_job_position(basic_info['idx'])
+                if position and position.get('full_grade'):
+                    basic_info['grade'] = position['full_grade']  # "간호서기 4명" 형태
+                    print(f"        채용직급: {position['full_grade']}")
+                else:
+                    basic_info['grade'] = '채용직급 정보 없음'
+                    print(f"        채용직급: 정보 없음")
+                time.sleep(0.3)
                 
                 # Firebase 저장 데이터 구성
                 save_data = {
-                    **detail_info,
-                    'files': files,
+                    **basic_info,
                     'created_at': datetime.now(),
                     'updated_at': datetime.now(),
-                    'collection_reason': reason  # 수집 이유 기록
+                    'collection_reason': reason,  # 수집 이유 기록
+                    'data_completeness': 'full_4api'  # 완전 데이터 표시
                 }
                 
                 # Firebase에 저장
