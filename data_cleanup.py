@@ -71,11 +71,11 @@ def get_seoul_time():
 def cleanup_old_jobs():
     """30일 지난 게시글 정리 (서울시각 기준)"""
     print("=" * 70)
-    print("🧹 Firebase 데이터 정리 시작 (서울시각 기준)")
-    
+    print("Firebase 데이터 정리 시작 (서울시각 기준)")
+
     # 서울 시각으로 현재 시간 계산
     seoul_now = get_seoul_time()
-    print(f"⏰ 서울 시각: {seoul_now.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"서울 시각: {seoul_now.strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 70)
     
     try:
@@ -86,11 +86,11 @@ def cleanup_old_jobs():
         today = seoul_now.date()
         cutoff_date = today - timedelta(days=30)  # 30일 전
         
-        print(f"📅 기준일 (서울시각): {today.strftime('%Y-%m-%d')}")
-        print(f"📅 삭제 대상: {cutoff_date.strftime('%Y-%m-%d')} 이전 등록 게시글")
-        
+        print(f"기준일 (서울시각): {today.strftime('%Y-%m-%d')}")
+        print(f"삭제 대상: {cutoff_date.strftime('%Y-%m-%d')} 이전 등록 게시글")
+
         # 모든 게시글 조회
-        print("📋 모든 게시글 조회 중...")
+        print("모든 게시글 조회 중...")
         docs = db.collection('jobs').stream()
         
         total_count = 0
@@ -126,52 +126,57 @@ def cleanup_old_jobs():
                     preserved_count += 1
 
             except Exception as e:
-                print(f"⚠️ 문서 처리 오류 (ID: {doc.id}): {e}")
+                print(f"[WARNING] 문서 처리 오류 (ID: {doc.id}): {e}")
                 continue
         
-        print(f"📊 전체 게시글: {total_count}개")
-        print(f"📊 삭제 대상 (30일 초과): {len(candidates_for_deletion)}개")
-        print(f"📊 현행유지 (30일 이내): {preserved_count}개")
+        print(f"전체 게시글: {total_count}개")
+        print(f"삭제 대상 (30일 초과): {len(candidates_for_deletion)}개")
+        print(f"현행유지 (30일 이내): {preserved_count}개")
         
         # 삭제 실행
         deleted_count = 0
         if candidates_for_deletion:
-            print("\n🗑️ 30일 지난 게시글 삭제 실행 중...")
-            
+            print("\n30일 지난 게시글 삭제 실행 중...")
+
             for job in candidates_for_deletion:
                 try:
                     db.collection('jobs').document(job['id']).delete()
                     deleted_count += 1
-                    print(f"   ✅ 삭제: {job['title']} | {job['company']} | 등록일: {job['reg_date']}")
-                    
+                    print(f"   [DELETE] {job['title']} | {job['company']} | 등록일: {job['reg_date']}")
+
                     # 삭제 간격 (Rate Limiting)
                     time.sleep(0.1)
-                    
+
                 except Exception as e:
-                    print(f"   ❌ 삭제 실패 {job['id']}: {e}")
+                    print(f"   [ERROR] 삭제 실패 {job['id']}: {e}")
                     continue
         else:
-            print("\n💡 30일 지난 게시글이 없습니다. 모든 게시글이 현행유지됩니다.")
-        
-        print(f"\n✅ 정리 완료: {deleted_count}개 삭제됨, {preserved_count}개 현행유지")
-        
+            print("\n30일 지난 게시글이 없습니다. 모든 게시글이 현행유지됩니다.")
+
+        print(f"\n정리 완료: {deleted_count}개 삭제됨, {preserved_count}개 현행유지")
+
     except Exception as e:
-        print(f"❌ 데이터 정리 오류: {e}")
+        print(f"[ERROR] 데이터 정리 오류: {e}")
         sys.exit(1)
 
 def main():
     """메인 함수"""
     try:
+        # GitHub Actions 환경 체크
+        if os.environ.get('GITHUB_ACTIONS'):
+            print("Starting cleanup of job posts older than 30 days...")
+
         # 이모지 출력 문제 해결을 위한 인코딩 설정
-        if sys.platform == 'win32':
-            import io
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        import sys
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
         cleanup_old_jobs()
-        print("🎉 데이터 정리 작업 완료 (서울시각 기준)")
+        print("데이터 정리 작업 완료 (서울시각 기준)")
 
     except Exception as e:
-        print(f"💥 치명적 오류: {e}")
+        print(f"[FATAL] 치명적 오류: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
