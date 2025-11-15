@@ -35,10 +35,8 @@ jobs:
         pip install -r requirements.txt
         
     - name: Create Firebase credentials
-      env:
-        FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
       run: |
-        echo "$FIREBASE_CREDENTIALS" > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
+        echo '${{ secrets.FIREBASE_CREDENTIALS }}' > job-portal-c9d7f-firebase-adminsdk-fbsvc-b0f6caa11d.json
     
     - name: Run data cleanup
       env:
