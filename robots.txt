@@ -1,0 +1,14 @@
+# robots.txt for korea-jobportal.co.kr
+User-agent: *
+Allow: /
+Allow: /about.html
+Allow: /jobs/
+Disallow: /backup/
+Disallow: /*.backup.html
+
+# Google AdSense
+User-agent: Mediapartners-Google
+Allow: /
+
+# Sitemap
+Sitemap: https://korea-jobportal.co.kr/sitemap.xml

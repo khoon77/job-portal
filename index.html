@@ -4,8 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; connect-src 'self' https:; img-src 'self' data: https:;">
-    <title>대한민국 공공일터 채용정보</title>
-    
+
+    <!-- SEO 최적화 메타태그 -->
+    <title>대한민국 공공일터 채용정보 | 고용·채용·일자리·일터·채용정보 취업포털</title>
+    <meta name="description" content="대한민국 정부기관, 공공기관, 지자체의 최신 채용정보와 일자리 정보를 실시간으로! 고용, 채용, 일터, 채용정보 관련 모든 정보를 제공하는 대한민국 최대 공공일터 취업포털.">
+    <meta name="keywords" content="공공일터, 나라일터, 잡알리오, 고용, 채용, 일자리, 일터, 채용정보, 공공기관 채용, 정부기관 채용, 지자체 채용, 공무원 채용, 공기업 채용, 채용공고, 취업정보, 구인구직, 공공일자리, 정규직 채용, 계약직 채용, 무기계약직, 신입 채용, 경력 채용, 공공부문 채용, 국가기관 채용, 지방자치단체 채용, 취업포털, 채용사이트, 일자리 정보, 공채, 공개채용, 취업준비, 구직, 취직">
+    <meta name="author" content="대한민국 공공일터 채용정보 포털">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="language" content="Korean">
+    <meta name="geo.region" content="KR">
+    <meta name="geo.country" content="Korea">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://korea-jobportal.co.kr/">
+
+    <!-- Open Graph 메타태그 (소셜미디어 공유용) -->
+    <meta property="og:title" content="대한민국 공공일터 채용정보 | 고용·채용·일자리·일터·채용정보">
+    <meta property="og:description" content="정부기관, 공공기관, 지자체의 최신 채용정보와 일자리 정보를 실시간으로 확인하세요. 공무원 채용공고부터 공공기관 정규직·계약직 채용정보까지!">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ko_KR">
+    <meta property="og:url" content="https://korea-jobportal.co.kr/">
+    <meta property="og:site_name" content="대한민국 공공일터 채용정보">
+    <meta property="og:image" content="https://korea-jobportal.co.kr/icon_512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Twitter Card 메타태그 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="대한민국 공공일터 채용정보 | 고용·채용·일자리·일터·채용정보">
+    <meta name="twitter:description" content="정부기관, 공공기관, 지자체의 최신 채용정보와 일자리 정보를 실시간으로 확인하세요.">
+    <meta name="twitter:image" content="https://korea-jobportal.co.kr/icon_512.png">
+
+    <!-- PWA 메타태그 -->
+    <meta name="theme-color" content="#1565c0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="공공 채용">
+    <link rel="apple-touch-icon" href="icon_192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon_192.png">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- 구조화된 데이터 (Schema.org) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "대한민국 공공일터 채용정보",
+        "url": "https://korea-jobportal.co.kr",
+        "description": "고용, 채용, 일자리, 일터, 채용정보 관련 공공기관 채용정보 포털",
+        "publisher": {
+            "@type": "Organization",
+            "name": "대한민국 공공일터 채용정보 포털"
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://korea-jobportal.co.kr/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
@@ -2283,6 +2341,12 @@
                 
                 console.log('✅ Firestore 연결 완료');
                 
+                // 30일 필터링 (현재일 기준 동적 계산)
+                const now = new Date();
+                const cutoffDate = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+                const cutoffDateStr = cutoffDate.toISOString().split('T')[0].replace(/-/g, '');
+                console.log(`📅 30일 필터링 기준일: ${cutoffDate.toISOString().split('T')[0]}`);
+
                 // jobs 컬렉션에서 실시간 데이터 가져오기 (강제 서버 조회)
                 console.log('📡 서버에서 최신 데이터 요청 중...');
                 const jobsSnapshot = await db.collection('jobs')
@@ -2290,26 +2354,35 @@
                     .get({
                         source: 'server'  // 서버에서 실시간 데이터 강제 조회
                     });
-                
+
                 const jobs = [];
+                let excludedCount = 0;
+
                 jobsSnapshot.forEach(doc => {
                     const data = doc.data();
-                    jobs.push({
-                        idx: doc.id,
-                        title: data.title || '제목 없음',
-                        dept_name: data.dept_name || '기관명 없음',
-                        work_region: data.work_region || '지역 정보 없음',
-                        grade: data.grade || '급수 정보 없음',
-                        reg_date: data.reg_date || '',
-                        end_date: data.end_date || '',
-                        read_count: data.read_count || 0,
-                        etc_info: data.etc_info || 'N||N',
-                        contents: data.contents || '',
-                        files: data.files || []
-                    });
+                    const regDate = data.reg_date || '';
+
+                    // 30일 이내 데이터만 포함 (동적 계산)
+                    if (regDate && regDate >= cutoffDateStr) {
+                        jobs.push({
+                            idx: doc.id,
+                            title: data.title || '제목 없음',
+                            dept_name: data.dept_name || '기관명 없음',
+                            work_region: data.work_region || '지역 정보 없음',
+                            grade: data.grade || '급수 정보 없음',
+                            reg_date: regDate,
+                            end_date: data.end_date || '',
+                            read_count: data.read_count || 0,
+                            etc_info: data.etc_info || 'N||N',
+                            contents: data.contents || '',
+                            files: data.files || []
+                        });
+                    } else {
+                        excludedCount++;
+                    }
                 });
 
-                console.log('✅ Firebase에서 실시간 조회 완료:', jobs.length, '건');
+                console.log('✅ Firebase에서 실시간 조회 완료:', jobs.length, '건 (30일 이전 제외:', excludedCount, '건)');
                 console.log('📊 조회 시간:', new Date().toLocaleString());
                 console.log('🔍 첫 번째 데이터 IDX:', jobs[0]?.idx || 'N/A');
                 console.log('🔍 마지막 데이터 IDX:', jobs[jobs.length-1]?.idx || 'N/A');
