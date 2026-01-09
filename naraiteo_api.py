@@ -208,7 +208,7 @@ class NaraiteoAPI:
     def _make_request(self, endpoint: str, params: Dict) -> Optional[ET.Element]:
         """API 요청 공통 함수"""
         url = f"{self.base_url}/{endpoint}"
-        params["ServiceKey"] = self.service_key
+        params["serviceKey"] = self.service_key
         
         try:
             print(f"[API 요청] {endpoint}: {params}")
