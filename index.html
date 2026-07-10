@@ -207,6 +207,42 @@
             transform: none;
         }
 
+        .coupang-mid-ad {
+            max-width: 900px;
+            margin: 0 auto 30px;
+            padding: 14px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+
+        .coupang-mid-image-link {
+            display: block;
+            overflow: hidden;
+            border-radius: 10px;
+            line-height: 0;
+        }
+
+        .coupang-mid-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            transition: transform 0.2s ease;
+        }
+
+        .coupang-mid-image-link:hover .coupang-mid-image {
+            transform: scale(1.01);
+        }
+
+        .coupang-mid-disclosure {
+            margin-top: 10px;
+            color: #94a3b8;
+            font-size: 11px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
         /* 통계 카드 */
         .stats-grid {
             background: #1976d2;
@@ -1533,6 +1569,10 @@
             .search-box {
                 min-width: auto;
             }
+
+            .coupang-mid-ad {
+                padding: 10px;
+            }
         }
 
         .error-message {
@@ -1939,6 +1979,13 @@
         </div>
 
         <!-- 채용공고 섹션 -->
+        <section class="coupang-mid-ad" aria-label="Coupang Partners advertisement">
+            <a class="coupang-mid-image-link" href="https://link.coupang.com/a/fgx5DXnjHw" target="_blank" rel="sponsored nofollow noopener">
+                <img class="coupang-mid-image" src="assets/coupang-redmi-smartwatch6.png" alt="REDMI 스마트워치 6 출시 혜택 확인하기">
+            </a>
+            <div class="coupang-mid-disclosure">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+        </section>
+
         <div class="jobs-section">
             <div class="jobs-header">
                 <h2>최신 채용공고</h2>
