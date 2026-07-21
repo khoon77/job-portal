@@ -1890,11 +1890,10 @@
                         </label>
                     </div>
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-local" class="agency-checkbox" disabled>
-                        <label for="filter-local" class="tab-label disabled" onclick="showComingSoon(this, event)">
+                        <input type="checkbox" id="filter-local" class="agency-checkbox">
+                        <label for="filter-local" class="tab-label" onclick="handleAgencyClick('local', event)">
                             <span class="filter-icon">🏙️</span>
                             <span class="filter-label">지자체</span>
-                            <div class="coming-soon-tooltip">연결예정</div>
                         </label>
                     </div>
                 </div>
@@ -2752,6 +2751,9 @@
             if (agencyType === 'public') {
                 // 공공기관 클릭시 public-job.co.kr로 연결
                 window.open('https://public-job.co.kr', '_blank');
+            } else if (agencyType === 'local') {
+                // 지자체 클릭시 지자체 공공일터로 연결
+                window.open('https://khoon77.github.io/job-region/', '_blank');
             } else if (agencyType === 'government') {
                 // 정부기관 클릭시 다른 기관들 비활성화
                 const governmentCheckbox = document.getElementById('filter-government');
