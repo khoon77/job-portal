@@ -1894,7 +1894,7 @@
                         <label for="filter-local" class="tab-label" onclick="handleAgencyClick('local', event)">
                             <span class="filter-icon">🏙️</span>
                             <span class="filter-label">지자체</span>
-                        </label>
+                       </label>
                     </div>
                 </div>
                 <div class="filter-info">
@@ -1990,15 +1990,43 @@
         
         // 날짜 포맷팅 (YYYYMMDD -> YYYY-MM-DD)
         function formatDate(dateString) {
-            if (!dateString || dateString.length !== 8) return dateString || '-';
+            if (!dateString) return '-';
+            
+            // 만약 Firestore Timestamp 객체인 경우 처리
+            if (typeof dateString === 'object' && dateString.seconds) {
+                const date = new Date(dateString.seconds * 1000);
+                return date.toISOString().split('T')[0];
+            }
+            
+            const str = String(dateString);
+            if (str.length !== 8) return str || '-';
             
             // 99991231인 경우 상시채용으로 표시
-            if (dateString === '99991231') return '상시채용';
+            if (str === '99991231') return '상시채용';
             
-            const year = dateString.substring(0, 4);
-            const month = dateString.substring(4, 6);
-            const day = dateString.substring(6, 8);
+            const year = str.substring(0, 4);
+            const month = str.substring(4, 6);
+            const day = str.substring(6, 8);
             return `${year}-${month}-${day}`;
+        }
+        
+        // 샘플 데이터 (백업용)
+        function getSampleJobs() {
+            return [
+                {
+                    idx: 'sample-1',
+                    title: '데이터 로드에 실패했습니다. (샘플 데이터)',
+                    dept_name: '시스템 알림',
+                    work_region: '전국',
+                    grade: '-',
+                    reg_date: new Date().toISOString().slice(0,10).replace(/-/g, ''),
+                    end_date: '99991231',
+                    read_count: 0,
+                    etc_info: 'N||N',
+                    contents: 'Firebase 연결에 문제가 있거나 데이터가 없습니다. 설정을 확인해 주세요.',
+                    files: []
+                }
+            ];
         }
         
         // D-Day 계산
@@ -2087,17 +2115,28 @@
                 // 기관별 색상 클래스
                 const orgColorClass = getOrgColorClass(job.dept_name);
                 
+                // 7일 이내 신규 게시글 여부 확인
+                const isNew = job.reg_date && (function() {
+                    const regDate = new Date(
+                        parseInt(job.reg_date.substring(0, 4)),
+                        parseInt(job.reg_date.substring(4, 6)) - 1,
+                        parseInt(job.reg_date.substring(6, 8))
+                    );
+                    const diff = (new Date() - regDate) / (1000 * 60 * 60 * 24);
+                    return diff >= 0 && diff <= 7;
+                })();
+                
                 return `
                     <div class="job-card" onclick="showJobDetail('${job.idx}')">
                         <div class="job-header">
                             <div class="job-badges">
-                                <span class="job-badge badge-new">NEW</span>
+                                ${isNew ? '<span class="job-badge badge-new">NEW</span>' : ''}
                                 <span class="job-badge badge-org ${orgColorClass}">${shortDeptName}</span>
                             </div>
                             ${dDayFormatted ? `<div class="job-dday-badge ${dDayClass}">${dDayFormatted}</div>` : ''}
                         </div>
                         
-                        <h3 class="job-title">${job.title || '제목 없음'}</h3>
+                        <h3 class="job-title"><a href="/jobs/${job.idx}/" onclick="event.preventDefault(); event.stopPropagation(); showJobDetail('${job.idx}')" style="color:inherit; text-decoration:none;">${job.title || '제목 없음'}</a></h3>
                         
                         <div class="job-meta">
                             <div class="meta-item">
