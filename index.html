@@ -1863,8 +1863,39 @@
                 flex: none;
             }
         }
+
+        /* 카카오 애드핏 광고 영역 */
+        .kakao-ad-slot {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .kakao-ad-side {
+            position: fixed;
+            top: 50%;
+            right: 12px;
+            z-index: 500;
+            transform: translateY(-50%);
+        }
+        .kakao-ad-side-mobile { display: none; }
+        @media (max-width: 1600px) {
+            .kakao-ad-side-pc { display: none; }
+        }
+        @media (max-width: 768px) {
+            .kakao-ad-slot { margin: 16px auto; }
+            .kakao-ad-side-mobile {
+                display: flex;
+                position: static;
+                transform: none;
+                margin: 20px auto;
+            }
+        }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6828405768081589" crossorigin="anonymous"></script>
+    <script async src="https://t1.kakaocdn.net/kas/static/ba.min.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -1904,8 +1935,17 @@
         </div>
     </div>
 
+    <!-- 카카오 애드핏: PC 사이드 -->
+    <aside class="kakao-ad-side kakao-ad-side-pc" aria-label="광고">
+        <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-Hp5Vvh8Nj54I1Mfd" data-ad-width="160" data-ad-height="600"></ins>
+    </aside>
+
     <!-- 메인 컨테이너 -->
     <div class="container">
+        <!-- 카카오 애드핏: 상단 -->
+        <div class="kakao-ad-slot kakao-ad-top" aria-label="광고">
+            <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-qBy2J4SOngP28Qfk" data-ad-width="300" data-ad-height="250"></ins>
+        </div>
         <!-- 통계 섹션 -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -1940,6 +1980,11 @@
             </button>
         </div>
 
+        <!-- 카카오 애드핏: 중단 -->
+        <div class="kakao-ad-slot kakao-ad-middle" aria-label="광고">
+            <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-C0k5hqB8B7jPSbas" data-ad-width="320" data-ad-height="100"></ins>
+        </div>
+
         <!-- 채용공고 섹션 -->
         <div class="jobs-section">
             <div class="jobs-header">
@@ -1964,6 +2009,14 @@
             <button class="pagination-btn" id="nextBtn" onclick="goToPage(currentPage + 1)">
                 다음 ▶
             </button>
+        </div>
+        <!-- 카카오 애드핏: 하단 -->
+        <div class="kakao-ad-slot kakao-ad-bottom" aria-label="광고">
+            <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-G10fiRxL9QraAYiG" data-ad-width="250" data-ad-height="250"></ins>
+        </div>
+        <!-- 카카오 애드핏: 모바일 전용 -->
+        <div class="kakao-ad-slot kakao-ad-side-mobile" aria-label="광고">
+            <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-2S8TBurFsIXJ0Gue" data-ad-width="320" data-ad-height="480"></ins>
         </div>
     </div>
 
