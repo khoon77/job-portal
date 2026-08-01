@@ -6,6 +6,7 @@
 - 첨부파일 정보 조회
 """
 
+import time
 import requests
 import xml.etree.ElementTree as ET
 import json
@@ -15,7 +16,16 @@ from typing import List, Dict, Any, Optional
 # API 설정
 SERVICE_KEY = "1bmDITdGFoaDTSrbT6Uyz8bFdlIL3nydHgRu0xQtXO8SiHlCrOJKv+JNSythF12BiijhVB3qE96/4Jxr70zUNg=="
 BASE_URL = "http://openapi.mpm.go.kr/openapi/service/RetrievePblinsttEmpmnInfoService"
-TIMEOUT = 3
+TIMEOUT = (10, 30)
+MAX_ATTEMPTS = 5
+RETRY_INTERVAL_SECONDS = 10
+
+class APIConnectionError(RuntimeError):
+    def __init__(self, endpoint: str, attempts: int, last_error: Exception):
+        self.endpoint = endpoint
+        self.attempts = attempts
+        self.last_error = last_error
+        super().__init__(f"{endpoint} 연결 실패 ({attempts}/{attempts}): {last_error}")
 
 class NaraiteoAPI:
     """나라일터 API 클래스"""
@@ -206,33 +216,41 @@ class NaraiteoAPI:
         return ""
     
     def _make_request(self, endpoint: str, params: Dict) -> Optional[ET.Element]:
-        """API 요청 공통 함수"""
+        """API 요청 공통 함수: 연결 오류는 5회 재시도하고 다른 오류와 구분한다."""
         url = f"{self.base_url}/{endpoint}"
-        params["serviceKey"] = self.service_key
-        
-        try:
-            print(f"[API 요청] {endpoint}: {params}")
-            response = requests.get(url, params=params, timeout=TIMEOUT)
-            response.raise_for_status()
-            
-            root = ET.fromstring(response.content)
-            
-            # 에러 응답 체크
-            result_code = root.findtext(".//resultCode")
-            if result_code and result_code != "00":
-                result_msg = root.findtext(".//resultMsg")
-                print(f"[API 에러] {result_code}: {result_msg}")
-                return None
-                
-            return root
-            
-        except requests.RequestException as e:
-            print(f"[네트워크 오류] {e}")
-            return None
-        except ET.ParseError as e:
-            print(f"[XML 파싱 오류] {e}")
-            return None
-    
+        request_params = {**params, "serviceKey": self.service_key}
+        transient_errors = (
+            requests.exceptions.ConnectTimeout,
+            requests.exceptions.ReadTimeout,
+            requests.exceptions.ConnectionError,
+        )
+        last_error = None
+
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            try:
+                print(f"[API 요청] {endpoint} 연결 시도 ({attempt}/{MAX_ATTEMPTS})")
+                response = requests.get(url, params=request_params, timeout=TIMEOUT)
+                response.raise_for_status()
+                root = ET.fromstring(response.content)
+                result_code = root.findtext(".//resultCode")
+                if result_code and result_code != "00":
+                    result_msg = root.findtext(".//resultMsg")
+                    raise RuntimeError(f"{endpoint} API 오류 {result_code}: {result_msg}")
+                print(f"[CONNECTION] {endpoint} 연결 성공 ({attempt}/{MAX_ATTEMPTS})")
+                return root
+            except transient_errors as exc:
+                last_error = exc
+                print(f"[CONNECTION] {endpoint} 연결 실패 ({attempt}/{MAX_ATTEMPTS}): {type(exc).__name__}")
+                if attempt < MAX_ATTEMPTS:
+                    print(f"[RETRY] {RETRY_INTERVAL_SECONDS}초 후 다시 시도합니다.")
+                    time.sleep(RETRY_INTERVAL_SECONDS)
+            except requests.exceptions.RequestException as exc:
+                raise RuntimeError(f"{endpoint} HTTP 요청 오류: {exc}") from exc
+            except ET.ParseError as exc:
+                raise RuntimeError(f"{endpoint} XML 파싱 오류: {exc}") from exc
+
+        raise APIConnectionError(endpoint, MAX_ATTEMPTS, last_error)
+
     def get_job_list(self, page_no: int = 1, num_of_rows: int = 20) -> List[Dict]:
         """채용공고 목록 조회"""
         params = {
