@@ -8,7 +8,7 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 from datetime import datetime, timedelta
-from naraiteo_api import NaraiteoAPI
+from naraiteo_api import APIConnectionError, NaraiteoAPI
 import time
 
 def initialize_firebase():
@@ -251,6 +251,8 @@ def sync_new_jobs():
         
         print(f"[SUCCESS] 신규 게시글 {saved_count}개 저장 완료")
         
+    except APIConnectionError:
+        raise
     except Exception as e:
         print(f"[ERROR] 전체 동기화 오류: {e}")
         sys.exit(1)
@@ -260,10 +262,22 @@ def main():
     try:
         sync_new_jobs()
         print("[COMPLETE] 30일 기준 필터링 자동 동기화 완료")
-        
-    except Exception as e:
-        print(f"[FATAL] 치명적 오류: {e}")
+    except APIConnectionError as exc:
+        message = f"나라일터 API 연결 실패 ({exc.attempts}/{exc.attempts}). 기존 데이터는 유지하며 다음 예약 실행에서 다시 시도합니다."
+        print(f"[CONNECTION FAILED] {message}")
+        print(f"::notice title=나라일터 API 연결 실패::{message}")
+        summary_path = os.getenv("GITHUB_STEP_SUMMARY")
+        if summary_path:
+            with open(summary_path, "a", encoding="utf-8") as summary:
+                summary.write("## 정부기관 채용정보 동기화 결과\n\n")
+                summary.write("| 항목 | 결과 |\n|---|---|\n")
+                summary.write(f"| 상태 | 연결 실패 ({exc.attempts}/{exc.attempts}) |\n")
+                summary.write("| Firestore | 기존 데이터 유지 |\n")
+                summary.write("| 다음 동작 | 다음 예약 실행에서 재시도 |\n")
+    except Exception as exc:
+        print(f"[FATAL] 치명적 오류: {exc}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
