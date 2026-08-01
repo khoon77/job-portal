@@ -260,6 +260,17 @@
             font-weight: 800;
         }
 
+        /* 통계 상세설명 아코디언 */
+        .stats-description { width: 100%; max-width: 900px; margin: 15px auto 25px; font-family: '맑은 고딕', 'Malgun Gothic', sans-serif; }
+        .stats-toggle { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04); }
+        .stats-toggle:hover { background: #f1f5f9; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); }
+        .stats-toggle-header { padding: 12px 16px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: #3b82f6; }
+        .stats-toggle-icon { transition: transform 0.3s ease; font-size: 14px; }
+        .stats-toggle.expanded .stats-toggle-icon { transform: rotate(180deg); }
+        .stats-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .stats-toggle.expanded .stats-content { max-height: 200px; }
+        .stats-content-inner { padding: 15px 20px; font-size: 13px; color: #4a5568; line-height: 1.6; text-align: justify; border-top: 1px solid #e2e8f0; background: #fff; word-break: keep-all; overflow-wrap: break-word; }
+        @media (max-width: 768px) { .stats-description { margin: 12px auto 20px; } .stats-content-inner { padding: 12px 15px; font-size: 12px; line-height: 1.5; text-align: left; } }
         /* 채용공고 리스트 */
         .jobs-section {
             background: transparent;
@@ -271,10 +282,10 @@
 
         .jobs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 25px;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 0 auto 50px;
         }
 
         .job-card {
@@ -1448,64 +1459,10 @@
         }
         
         /* 페이지네이션 */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin: 40px 0;
-            padding: 20px;
-        }
-        
-        .pagination-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .pagination-btn:hover:not(:disabled) {
-            background: #2563eb;
-            transform: translateY(-1px);
-        }
-        
-        .pagination-btn:disabled {
-            background: #d1d5db;
-            color: #9ca3af;
-            cursor: not-allowed;
-        }
-        
-        .pagination-numbers {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .page-number {
-            background: white;
-            color: #374151;
-            border: 1px solid #d1d5db;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .page-number:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
-        
-        .page-number.active {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
+        .pagination { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px; margin: 20px 0 40px; }
+        .page-btn { display: inline-block; min-width: 32px; padding: 6px 8px; color: #374151; border: 1px solid transparent; border-radius: 6px; background: transparent; cursor: pointer; font-size: 14px; }
+        .page-btn:hover { background: #f3f4f6; border-color: #d1d5db; }
+        .page-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; font-weight: 700; }
 
         /* 반응형 */
         @media (max-width: 768px) {
@@ -1863,8 +1820,39 @@
                 flex: none;
             }
         }
+
+        /* 카카오 애드핏 광고 영역 */
+        .kakao-ad-slot {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .kakao-ad-side {
+            position: fixed;
+            top: 50%;
+            right: 12px;
+            z-index: 500;
+            transform: translateY(-50%);
+        }
+        .kakao-ad-side-mobile { display: none; }
+        @media (max-width: 1600px) {
+            .kakao-ad-side-pc { display: none; }
+        }
+        @media (max-width: 768px) {
+            .kakao-ad-slot { margin: 16px auto; }
+            .kakao-ad-side-mobile {
+                display: flex;
+                position: static;
+                transform: none;
+                margin: 20px auto;
+            }
+        }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6828405768081589" crossorigin="anonymous"></script>
+    <script async src="https://t1.kakaocdn.net/kas/static/ba.min.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -1904,8 +1892,17 @@
         </div>
     </div>
 
+    <!-- 카카오 애드핏: PC 사이드 -->
+    <aside class="kakao-ad-side kakao-ad-side-pc" aria-label="광고">
+        <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-Hp5Vvh8Nj54I1Mfd" data-ad-width="160" data-ad-height="600"></ins>
+    </aside>
+
     <!-- 메인 컨테이너 -->
     <div class="container">
+        <!-- 카카오 애드핏: 상단 -->
+        <div class="kakao-ad-slot kakao-ad-top" aria-label="광고">
+            <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-qBy2J4SOngP28Qfk" data-ad-width="300" data-ad-height="250"></ins>
+        </div>
         <!-- 통계 섹션 -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -1929,6 +1926,13 @@
                 <div class="stat-sublabel">(중복제외)</div>
             </div>
         </div>
+        <!-- 통계 상세설명 -->
+        <div class="stats-description">
+            <div class="stats-toggle" role="button" tabindex="0" aria-expanded="false" onclick="toggleStatsInfo(this)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleStatsInfo(this); }">
+                <div class="stats-toggle-header"><span>📊 통계 상세설명 보기</span><span class="stats-toggle-icon" aria-hidden="true">▼</span></div>
+                <div class="stats-content"><div class="stats-content-inner">본 사이트는 공공데이터를 활용하여 <strong>최근 30일 이내 채용 건수</strong>, <strong>최근 7일 채용 건수</strong>, <strong>마감일까지 3일 이하로 남은 채용 건수</strong>를 표시합니다. 상단 기관 유형을 선택하면 정부기관·공공기관·지자체 채용정보를 구분해 확인할 수 있습니다.</div></div>
+            </div>
+        </div>
 
         <!-- 제어 패널 -->
         <div class="controls">
@@ -1938,6 +1942,11 @@
             <button class="load-btn" id="loadBtn" onclick="searchJobs()">
                 📥 검색 조회
             </button>
+        </div>
+
+        <!-- 카카오 애드핏: 중단 -->
+        <div class="kakao-ad-slot kakao-ad-middle" aria-label="광고">
+            <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-C0k5hqB8B7jPSbas" data-ad-width="320" data-ad-height="100"></ins>
         </div>
 
         <!-- 채용공고 섹션 -->
@@ -1954,16 +1963,14 @@
         </div>
         
         <!-- 페이지네이션 -->
-        <div class="pagination" id="pagination" style="display: none;">
-            <button class="pagination-btn" id="prevBtn" onclick="goToPage(currentPage - 1)">
-                ◀ 이전
-            </button>
-            <div class="pagination-numbers" id="paginationNumbers">
-                <!-- 페이지 번호들이 여기에 동적으로 생성 -->
-            </div>
-            <button class="pagination-btn" id="nextBtn" onclick="goToPage(currentPage + 1)">
-                다음 ▶
-            </button>
+        <nav class="pagination" id="pagination" aria-label="채용공고 페이지"></nav>
+        <!-- 카카오 애드핏: 하단 -->
+        <div class="kakao-ad-slot kakao-ad-bottom" aria-label="광고">
+            <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-G10fiRxL9QraAYiG" data-ad-width="250" data-ad-height="250"></ins>
+        </div>
+        <!-- 카카오 애드핏: 모바일 전용 -->
+        <div class="kakao-ad-slot kakao-ad-side-mobile" aria-label="광고">
+            <ins class="kakao_ad_area" style="display:none;" data-ad-unit="DAN-2S8TBurFsIXJ0Gue" data-ad-width="320" data-ad-height="480"></ins>
         </div>
     </div>
 
@@ -2691,39 +2698,20 @@
         function updatePagination(totalJobs) {
             const totalPages = Math.ceil(totalJobs / jobsPerPage);
             const pagination = document.getElementById('pagination');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const numbersContainer = document.getElementById('paginationNumbers');
-            
-            if (totalPages <= 1) {
-                pagination.style.display = 'none';
-                return;
-            }
-            
-            pagination.style.display = 'flex';
-            
-            // 이전/다음 버튼 상태
-            prevBtn.disabled = currentPage <= 1;
-            nextBtn.disabled = currentPage >= totalPages;
-            
-            // 페이지 번호 생성
-            let numbersHtml = '';
-            const showPages = 5; // 표시할 페이지 번호 개수
-            let startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
-            let endPage = Math.min(totalPages, startPage + showPages - 1);
-            
-            if (endPage - startPage + 1 < showPages) {
-                startPage = Math.max(1, endPage - showPages + 1);
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                const activeClass = i === currentPage ? 'active' : '';
-                numbersHtml += `<button class="page-number ${activeClass}" onclick="goToPage(${i})">${i}</button>`;
-            }
-            
-            numbersContainer.innerHTML = numbersHtml;
+            if (totalPages <= 1) { pagination.innerHTML = ''; return; }
+            let html = '';
+            const maxPages = 10;
+            const startPage = Math.floor((currentPage - 1) / maxPages) * maxPages + 1;
+            const endPage = Math.min(startPage + maxPages - 1, totalPages);
+            if (currentPage > 1) html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})" aria-label="이전 페이지">이전</button>`;
+            if (startPage > 1) html += `<button class="page-btn" onclick="goToPage(${startPage - 1})" aria-label="이전 10페이지">…</button>`;
+            for (let page = startPage; page <= endPage; page++) { const active = page === currentPage ? ' active' : ''; const current = page === currentPage ? ' aria-current="page"' : ''; html += `<button class="page-btn${active}" onclick="goToPage(${page})"${current}>${page}</button>`; }
+            if (endPage < totalPages) html += `<button class="page-btn" onclick="goToPage(${endPage + 1})" aria-label="다음 10페이지">…</button>`;
+            if (currentPage < totalPages) html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" aria-label="다음 페이지">다음</button>`;
+            pagination.innerHTML = html;
         }
-        
+        function toggleStatsInfo(element) { const expanded = element.classList.toggle('expanded'); element.setAttribute('aria-expanded', String(expanded)); }
+
         // 연결 예정 메시지 표시
         function showComingSoonMessage() {
             // 기존 메시지가 있으면 제거
